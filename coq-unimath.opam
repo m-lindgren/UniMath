@@ -5,10 +5,11 @@ dev-repo: "git+https://github.com/UniMath/UniMath.git"
 bug-reports: "https://github.com/UniMath/UniMath/issues"
 license: "Similar to MIT license"
 authors: ["The UniMath Development Team"]
-build: [make "BUILD_COQ=no" "-j%{jobs}%"]
-install: [make "BUILD_COQ=no" "install"]
+build: ["dune" "build" "-p" name "-j" jobs]
+
 depends: [
   "ocaml"
+  "dune" {>= "3.6.1"}
   "coq" {>= "8.16.1"}
 ]
 synopsis: "Library of Univalent Mathematics"

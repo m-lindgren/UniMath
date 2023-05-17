@@ -32,7 +32,7 @@ Section Equations.
 
   Definition eqsystemids (σ : signature) (V: varspec σ): eqsystem σ V → UU := pr1.
 
-  Coercion eqsystemids : eqsystem >-> UU.
+  Coercion eqsystemids : eqsystem >-> Sortclass.
 
   Definition geteq {σ: signature} {V: varspec σ} {sys : eqsystem σ V}: sys → equation σ V
     := pr2 sys.

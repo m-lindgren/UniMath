@@ -233,12 +233,14 @@ Defined.
 
 Lemma istrans_SubObj_rel (c : C) : istrans (SubObj_rel c).
 Proof.
-apply istransquotrel, istrans_monorel.
+  use istransquotrel.
+  apply istrans_monorel.
 Qed.
 
 Lemma isrefl_SubObj_rel (c : C) : isrefl (SubObj_rel c).
 Proof.
-apply isreflquotrel, isrefl_monorel.
+  use isreflquotrel.
+  apply isrefl_monorel.
 Qed.
 
 Lemma ispreorder_SubObj_rel (c : C) : ispreorder (SubObj_rel c).
@@ -288,6 +290,7 @@ Definition SubObjPoset (c : C) : Poset :=
 End subobj.
 
 (*Definition of the functor C^op -> HSET which maps c on SubObj c and maps morphism "by pullback"*)
+
 Section SubObj_functor.
 
 Context (C : category) (PB : Pullbacks C).

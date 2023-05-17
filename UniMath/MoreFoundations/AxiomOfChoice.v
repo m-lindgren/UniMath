@@ -55,8 +55,9 @@ Local Open Scope logic.
 
 Definition AxiomOfChoice : hProp := ∀ (X:hSet), ischoicebase X.
 
-Definition AxiomOfChoice_surj : hProp :=
-  ∀ (X:hSet) (Y:UU) (f:Y→X), issurjective f ⇒ ∃ g, ∀ x, f (g x) = x.
+Definition AxiomOfChoice_surj : hProp
+  := ∀ (X : hSet) (Y : UU) (f : Y → X), issurjective f ⇒ ∃ g : X -> Y, ∀ (x : X), f (g x) = x.
+
 (** Notice that the equation above is a proposition only because X is a set, which is not required
     in the previous formulation.  The notation for "=" currently in effect uses [eqset] instead of
     [paths].  *)
@@ -67,7 +68,7 @@ Lemma AC_impl2 : AxiomOfChoice <-> AxiomOfChoice_surj.
 Proof.
   split.
   - intros AC X Y f surj.
-    use (squash_to_prop (AC _ _ surj) (propproperty _)).
+    apply(squash_to_prop (AC _ _ surj) (propproperty _)).
     intro s.
     use hinhpr.
     use tpair.

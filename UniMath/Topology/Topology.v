@@ -138,7 +138,7 @@ Lemma isOpen_hfalse :
 Proof.
   apply isSetOfOpen_hfalse.
   intros P H.
-  now apply isOpen_union.
+  exact(isOpen_union P H).
 Qed.
 Lemma isOpen_htrue :
   isOpen (λ _ : T, htrue).
@@ -163,7 +163,7 @@ Lemma isOpen_or :
 Proof.
   intros A B Ha Hb.
   rewrite <- union_or.
-  apply isOpen_union.
+  use isOpen_union.
   intros C.
   apply hinhuniv.
   apply sumofmaps ; intros ->.
@@ -212,7 +212,7 @@ Proof.
         apply (pr2 (pr1 (pr2 A))).
         exact (pr2 (pr2 A)). }
     rewrite X.
-    apply isOpen_union.
+    use isOpen_union.
     intros A Ha.
     apply (pr1 Ha).
   - intros Hp x Px.

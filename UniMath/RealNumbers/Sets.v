@@ -271,5 +271,5 @@ Definition isCompleteSpace (X : PreorderedSet) :=
     hexists (isUpperBound E) -> hexists E -> LeastUpperBound E.
 Definition CompleteSpace  :=
   ∑ X : PreorderedSet, isCompleteSpace X.
-Definition pr1CompleteSpace : CompleteSpace → UU := pr1.
-Coercion pr1CompleteSpace : CompleteSpace >-> UU.
+Definition pr1CompleteSpace : CompleteSpace → Type:= pr1.
+Coercion pr1CompleteSpace : CompleteSpace >-> Sortclass.

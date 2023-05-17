@@ -47,7 +47,7 @@ Lemma subtype_notEqual_containedIn {X:UU} (S T : hsubtype X) : S ⊆ T -> S ≢ 
 Proof.
   intros ci ne. apply (squash_to_hProp ne); clear ne; intros [n|n].
   - apply (squash_to_hProp n); clear n; intros [x [p q]]. apply fromempty.
-    change (neg (T x)) in q. apply q; clear q. apply (ci x). exact p.
+    change (neg (T x)) in q. apply q; clear q. use (ci x). exact p.
   - exact n.
 Defined.
 
@@ -88,6 +88,14 @@ Definition subtype_difference_containedIn {X:UU} (S T : hsubtype X) : (S - T) �
 Proof.
   intros x u. exact (pr1 u).
 Defined.
+
+Lemma subtype_contained_equal {X : Type} (S T : hsubtype X) : S ⊆ T ∧ T ⊆ S ⇒ S ≡ T.
+Proof.
+  intros [st ts].
+  split.
+  - exact(st x).
+  - exact(ts x).
+Qed.
 
 Lemma subtype_equal_cond {X:UU} (S T : hsubtype X) : S ⊆ T ∧ T ⊆ S ⇔ S ≡ T.
 Proof.
@@ -165,7 +173,8 @@ Defined.
 
 Lemma subtype_containment_isantisymm X : isantisymm (@subtype_containedIn X).
 Proof.
-  intros S T i j. apply (invmap (hsubtype_univalence S T)). apply subtype_equal_cond.
+  intros S T i j. apply (invmap (hsubtype_univalence S T)).
+  use subtype_contained_equal.
   split; assumption.
 Defined.
 
@@ -302,9 +311,9 @@ Proof.
   intros x p.
   cbn.
   split.
-  - apply (uu x).
+  - use (uu x).
     exact ((intersection_contained_l U V) x p).
-  - apply (vv x).
+  - use (vv x).
     exact ((intersection_contained_r U V) x p).
 Qed.
 
@@ -414,7 +423,7 @@ Lemma comp_hsubtype_preserving {X Y Z : UU}
 Proof.
   intros z zinU.
   rewrite image_hsubtype_comp in zinU.
-  apply (gsp _).
+  use (gsp _).
   unfold image_hsubtype.
   use (factor_through_squash _ _ zinU).
   { apply ishinh. }
@@ -422,7 +431,7 @@ Proof.
   apply hinhpr.
   exists (pr1 y).
   exists (pr12 y).
-  apply (fsp _).
+  use (fsp _).
   exact (pr22 y).
 Qed.
 

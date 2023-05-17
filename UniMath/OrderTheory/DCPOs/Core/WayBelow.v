@@ -35,6 +35,10 @@ Require Import UniMath.OrderTheory.DCPOs.Core.Basics.
 
 Local Open Scope dcpo.
 
+(* TODO : Enable Universe Checking. *)
+
+Local Unset Universe Checking.
+
 (**
  1. Definition of the way-below relation
  *)

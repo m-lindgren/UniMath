@@ -418,8 +418,8 @@ Definition make_invstruct {X : UU} {opp : binop X} {is : ismonoidop opp} (inv0 :
 
 (** ***** Group operations *)
 
-Definition isgrop {X : UU} (opp : binop X) : UU :=
-  total2 (λ is : ismonoidop opp, invstruct opp is).
+Definition isgrop {X : Type} (opp : binop X) : Type
+  := ∑ (ism : ismonoidop opp), invstruct opp ism.
 
 Definition make_isgrop {X : UU} {opp : binop X} (is1 : ismonoidop opp) (is2 : invstruct opp is1) :
   isgrop opp := tpair (λ is : ismonoidop opp, invstruct opp is) is1 is2.
@@ -502,7 +502,7 @@ Proof.
     - apply impred. intro x. simpl. apply (setproperty X).
     - apply impred. intro x. simpl. apply (setproperty X).
   }
-  apply (isapropsubtype (λ i : _, make_hProp _ (int i))).
+  use (isapropsubtype (λ i : _, make_hProp _ (int i))).
   intros inv1 inv2. simpl. intro ax1. intro ax2. apply funextfun. intro x0.
   apply (invmaponpathsweq (make_weq _ (isweqrmultingr_is (tpair _ is is0) x0))).
   simpl. rewrite (pr1 ax1 x0). rewrite (pr1 ax2 x0). apply idpath.
@@ -2261,7 +2261,7 @@ Lemma iscomprelrelfun_generated_binopeqrel {X Y : setwithbinop} {R : hrel X} {S 
       (f : binopfun X Y) (H : iscomprelrelfun R S f) :
   iscomprelrelfun (generated_binopeqrel R) (generated_binopeqrel S) f.
 Proof.
-  intros x x' r. apply (r (pullback_binopeqrel f (generated_binopeqrel S))).
+  intros x x' r. use (r (pullback_binopeqrel f (generated_binopeqrel S))).
   intros x1 x2 r' S' s. use s. apply H. exact r'.
 Defined.
 
@@ -2270,7 +2270,7 @@ Lemma iscomprelrelfun_generated_binopeqrel_rev {X Y : setwithbinop} {R : hrel X}
       (f : binopfun X (setwithbinop_rev Y)) (H : iscomprelrelfun R S f) :
   iscomprelrelfun (generated_binopeqrel R) (generated_binopeqrel S) f.
 Proof.
-  intros x x' r. apply (r (pullback_binopeqrel_rev f (generated_binopeqrel S))).
+  intros x x' r. use (r (pullback_binopeqrel_rev f (generated_binopeqrel S))).
   intros x1 x2 r' S' s. use s. apply H. exact r'.
 Defined.
 

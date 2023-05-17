@@ -299,6 +299,10 @@ Proof.
   apply initial.Initial_from_Colims, ColimsHSET_of_shape.
 Defined.
 
+(* TODO : Enable Universe Checking.
+          [is_colimit_finite_subsets_cocone] does not typecheck.
+ *)
+Local Unset Universe Checking.
 Section finite_subsets.
   (* This section proves that every set is the colimit of its finite subsets
      by showing that it satisfies the universal property. *)
@@ -362,6 +366,7 @@ Section finite_subsets.
 
 End finite_subsets.
 
+Local Set Universe Checking.
 (**
  Concrete construction of coequalizers of sets
  *)

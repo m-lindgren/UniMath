@@ -757,7 +757,7 @@ Section TermInduction.
       change (P (sort (princop t)) (build_term (princop t) (subterms t))).
       apply (R (princop t) (subterms t)).
       refine (h2map _ (subterms_length t)).
-      intros.
+      intros a p X.
       apply IHn.
       apply natlthsntoleh.
       eapply natlthlehtrans.

@@ -26,8 +26,8 @@ Definition folds_ob_mor := ∑ a : UU, a → a → UU.
 Definition make_folds_ob_mor (ob : UU)(mor : ob → ob → UU) :
     folds_ob_mor := tpair _ ob mor.
 
-Definition ob (C : folds_ob_mor) : UU := @pr1 _ _ C.
-Coercion ob : folds_ob_mor >-> UU.
+Definition ob (C : folds_ob_mor) : Type := @pr1 _ _ C.
+Coercion ob : folds_ob_mor >-> Sortclass.
 
 Definition folds_morphisms {C : folds_ob_mor} : C → C → UU := pr2 C.
 Local Notation "a ⇒ b" := (folds_morphisms a b).

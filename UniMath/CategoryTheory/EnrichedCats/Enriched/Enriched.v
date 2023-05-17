@@ -83,7 +83,7 @@ Section Def.
     enriched_cat_mor y z ⊗ enriched_cat_mor x y --> enriched_cat_mor x z :=
     pr2 (pr2 (pr2 d)) x y z.
 
-  Coercion enriched_cat_ob : enriched_precat_data >-> UU.
+  Coercion enriched_cat_ob : enriched_precat_data >-> Sortclass.
 
   (** Constructor. Use like so: [use make_enriched_cat_data] *)
   Definition make_enriched_precat_data (C : UU) (mor : ∏ x y : C, ob Mon_V)

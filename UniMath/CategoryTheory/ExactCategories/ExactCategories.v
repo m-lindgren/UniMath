@@ -1320,7 +1320,7 @@ Section ExactCategoryFacts.
     (* see Bühler's 2.9 *)
     intro i. apply (squash_to_hProp i). intros [D [p j]].
     apply hinhpr. exists D. exists (π₁ · p). apply ExactSequenceFromEpi.
-    2:{ apply EC_ComposeEpi.
+    2:{ use EC_ComposeEpi.
         - apply Pr1IsAdmEpi.
         - exact (hinhpr(A,,f,,j)). }
     apply (squash_to_hProp (to_hasZero M)); intros Z.
@@ -1731,7 +1731,6 @@ Section SplitSequences.
     Proof.
       Fail reflexivity.
       intros M A B C k r.
-      unfold isSplit2, isBinDirectSum; cbn; rewrite rewrite_op.
       (* do we need this? *)
     Abort.
   End Foo.
@@ -1944,7 +1943,7 @@ Section SplitSequences.
           { rewrite leftDistribute. rewrite (assoc' (r · p)). rewrite (to_Unel1 A'C); unfold to_unel.
             rewrite zeroRight, lunax. rewrite assoc'. rewrite (to_IdIn2 A'C).
             apply id_right. }
-    - cbn. exact (hinhpr(A',,ι₁,, hinhpr (π₁,,ι₂,,BinDirectSum_isBinDirectSum _ A'C))).
+    - exact (hinhpr(A',,ι₁,, hinhpr (π₁,,ι₂,,BinDirectSum_isBinDirectSum _ A'C))).
   Qed.
   Lemma PushoutSplitMono {M:AdditiveCategory} {A A' C : M} (i : A' --> A) (g : A' --> C) :
     isSplitMonomorphism i ⇒ ∃ PO : Pushout i g, isSplitMonomorphism (PushoutIn2 PO).

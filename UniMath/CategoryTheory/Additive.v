@@ -136,7 +136,7 @@ Section def_additive.
       use (hinhfun _ (sum a b S)); intros [c t]; clear sum. set (S' := replaceSum S t).
       use tpair.
       + exists c. exact (pr21 S').
-      + cbn. exact (pr2 S').
+      + exact (pr2 S').
   Defined.
 
   Lemma induced_opposite_Additive {M:AdditiveCategory}

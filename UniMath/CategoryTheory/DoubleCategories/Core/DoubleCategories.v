@@ -34,7 +34,7 @@ Definition predoublecategory_ob_mor_hor : UU
 
 Definition obdb (C : predoublecategory_ob_mor_hor) : UU := @pr1 _ _ C.
 
-Coercion obdb : predoublecategory_ob_mor_hor >-> UU.
+Coercion obdb : predoublecategory_ob_mor_hor >-> Sortclass.
 
 Definition predoublecategory_mor_ver (C : predoublecategory_ob_mor_hor) 
   : UU

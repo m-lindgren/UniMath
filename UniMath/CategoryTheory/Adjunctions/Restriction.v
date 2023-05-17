@@ -186,9 +186,12 @@ Section Restriction.
       pose (isomor := make_z_iso' _ (pr2 a) :
                         z_iso (pr1 a) (pr1 (right_adjoint are_adjoints_restricted_adjunction
                                            (left_adjoint are_adjoints_restricted_adjunction a)))).
-      apply (iso_in_precat_is_iso_in_subcat C _ _ _ isomor).
+      exact (iso_in_precat_is_iso_in_subcat C
+               (λ c : C, make_hProp (is_z_isomorphism (η c)) (isaprop_is_z_isomorphism (η c))) a
+               (right_adjoint are_adjoints_restricted_adjunction
+                  (left_adjoint are_adjoints_restricted_adjunction a))
+               isomor).
     - intro b.
-      cbn.
       pose (isomor := make_z_iso' _ (pr2 b) :
                         z_iso (pr1 (left_adjoint are_adjoints_restricted_adjunction
                                    (right_adjoint are_adjoints_restricted_adjunction b))) (pr1 b)).

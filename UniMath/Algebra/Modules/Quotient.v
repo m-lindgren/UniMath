@@ -13,7 +13,8 @@ Require Import UniMath.Algebra.Modules.Submodule.
 
 (** * Preliminaries: notion of an equivalence relation on a module that is closed under the module
 structure
-*)
+ *)
+
 Section quotmod_rel.
 
   Context {R : ring}

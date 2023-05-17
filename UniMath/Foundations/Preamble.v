@@ -11,36 +11,50 @@ notations for constructions defined in Coq.Init library as well as the definitio
 
 Require Export UniMath.Foundations.Init.
 
+
 (** Universe structure *)
 
-Definition UU := Type.
+Global Set Universe Polymorphism.
+Global Set Polymorphic Inductive Cumulativity.
+Global Unset Universe Minimization ToSet.
+Global Unset Strict Universe Declaration.
+Local Unset Elimination Schemes.
 
-Identity Coercion fromUUtoType : UU >-> Sortclass.
+Notation UU := Type (only parsing).
+Notation UU0 := Type@{Set} (only parsing).
 
 (** The empty type *)
-
-Inductive empty : UU := .
-
+Inductive empty : Type := .
 Notation "∅" := empty.
+Scheme Induction for empty Sort Type.
+Scheme Minimality for empty Sort Type.
+Definition empty_rec := empty_rect.
 
 (** The one-element type *)
-
-Inductive unit : UU :=
-    tt : unit.
+Inductive unit : Type :=
+  tt : unit.
+Scheme Induction for unit Sort Type.
+Scheme Minimality for unit Sort Type.
+Definition unit_rec := unit_rect.
 
 (** The two-element type *)
-
-Inductive bool : UU :=
+Inductive bool : Type :=
   | true : bool
   | false : bool.
+Scheme Induction for bool Sort Type.
+Scheme Minimality for bool Sort Type.
+Definition bool_rec := bool_rect.
 
-Definition negb (b:bool) := if b then false else true.
+Definition negb (b : bool) := if b then false else true.
 
 (** The coproduct of two types *)
 
-Inductive coprod (A B:UU) : UU :=
+Inductive coprod@{a b} (A : Type@{a}) (B : Type@{b}) : Type@{max(a, b)} :=
 | ii1 : A -> coprod A B
 | ii2 : B -> coprod A B.
+Scheme Induction for coprod Sort Type.
+Scheme Minimality for coprod Sort Type.
+Definition coprod_rec := coprod_rect.
 
 Arguments coprod_rect {_ _} _ _ _ _.
 Arguments ii1 {_ _} _.
@@ -55,12 +69,15 @@ Notation "X ⨿ Y" := (coprod X Y).
 (** The natural numbers *)
 
 (* Declare ML Module "nat_syntax_plugin". *)
+Inductive nat : UU0 :=
+| O : nat
+| S : nat -> nat.
 
-Inductive nat : UU :=
-  | O : nat
-  | S : nat -> nat.
+Scheme Induction for nat Sort Type.
+Scheme Minimality for nat Sort Type.
+Definition nat_rec := nat_rect.
 
-Definition succ := S.
+Notation succ := S (only parsing).
 
 Declare Scope nat_scope.
 Delimit Scope nat_scope with nat.
@@ -82,14 +99,11 @@ Fixpoint sub n m :=
   end
 where "n - m" := (sub n m) : nat_scope.
 
-(* note: our mul differs from that in Coq.Init.Nat  *)
-Definition mul : nat -> nat -> nat.
-Proof.
-  intros n m.
-  induction n as [|p pm].
-  - exact O.
-  - exact (pm + m).
-Defined.
+Fixpoint mul n m :=
+  match n with
+  | O => O
+  | S p => (mul p m) + m
+  end.
 
 Notation "n * m" := (mul n m) : nat_scope.
 
@@ -137,11 +151,15 @@ Notation "1000" := (10 * 100) : nat_scope.
 
 (** Identity Types *)
 
-Inductive paths {A:UU} (a:A) : A -> UU := paths_refl : paths a a.
+Inductive paths {A : Type} (a : A) : A -> Type
+  := idpath : paths a a.
+Scheme Induction for paths Sort Type.
+Definition paths_rec := paths_rect.
+Notation paths_refl := idpath.
+
 #[global]
-Hint Resolve paths_refl : core .
+Hint Resolve idpath : core .
 Notation "a = b" := (paths a b) : type_scope.
-Notation idpath := paths_refl .
 
 (* Remark: all of the uu0.v now uses only paths_rect and not the direct "match" construction
 on paths. By adding a constantin paths for the computation rule for paths_rect and then making
@@ -175,10 +193,14 @@ in a proof term, just mentally replace it by
 
 *)
 
-Set Primitive Projections.
-Set Nonrecursive Elimination Schemes.
+Global Set Primitive Projections.
+Global Set Nonrecursive Elimination Schemes.
 
-Record total2 { T: UU } ( P: T -> UU ) := tpair { pr1 : T; pr2 : P pr1 }.
+Record total2 {T : Type@{i}} (P : T -> Type@{j}) : Type@{k}
+  := tpair {
+         pr1 : T;
+         pr2 : P pr1
+       }.
 
 Arguments tpair {_} _ _ _.
 Arguments pr1 {_ _} _.

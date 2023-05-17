@@ -213,7 +213,7 @@ Proof.
   intro f.
   do 2 rewrite ϕo_ϕ₁_ϕ₂.
   rewrite ϕ₂_determined.
-  rewrite H.
+  etrans; [| apply pathsinv0; apply maponpaths; apply(!H)].
   apply idpath.
 Qed.
 
@@ -232,7 +232,9 @@ Proof.
         symmetry.
         eapply pathscomp0.
         { apply ϕ₁_is_comp. }
-        rewrite H. apply idpath.
+        apply maponpaths.
+        apply pathsinv0.
+        apply H.
     + apply funextsec; intro.
       apply subtypePath.
       * intro; apply isapropisweq.

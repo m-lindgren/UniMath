@@ -47,13 +47,14 @@ Section spec.
       induction HU as [U HU].
       exists U. use make_dirprod.
       + exact (dirprod_pr1 HU).
-      + apply (dirprod_pr2 (dirprod_pr2 HU p)), (dirprod_pr2 HA).
+      + use (dirprod_pr2 (dirprod_pr2 HU p)).
+        exact(dirprod_pr2 HA).
     - use (hinhuniv _ H); intro HU. induction HU as [U HU].
       use (hinhfun _ (H0 U (dirprod_pr1 HU))); intro HA.
       induction HA as [A HA].
       exists A. use make_dirprod.
       + apply hinhpr. exists U. exact (make_dirprod (dirprod_pr1 HU) HA).
-      + apply (dirprod_pr1 (HA p)), (dirprod_pr2 HU).
+      + use (dirprod_pr1 (HA p)). exact (dirprod_pr2 HU).
   Defined.
 
   Lemma zariski_topology_htrue :
@@ -77,11 +78,11 @@ Section spec.
     assert (H0 : U p ∧ V p ⇔ A ⊈ p ∧ B ⊈ p).
     { use make_dirprod; intro H.
       - use make_dirprod.
-        + apply (dirprod_pr1 (HA p)), (dirprod_pr1 H).
-        + apply (dirprod_pr1 (HB p)), (dirprod_pr2 H).
+        + use (dirprod_pr1 (HA p)). exact (dirprod_pr1 H).
+        + use (dirprod_pr1 (HB p)). exact (dirprod_pr2 H).
       - use make_dirprod.
-        + apply (dirprod_pr2 (HA p)), (dirprod_pr1 H).
-        + apply (dirprod_pr2 (HB p)), (dirprod_pr2 H). }
+        + use (dirprod_pr2 (HA p)). exact (dirprod_pr1 H).
+        + use (dirprod_pr2 (HB p)). exact (dirprod_pr2 H). }
     apply (logeq_trans H0). unfold subtype_notContainedIn.
     use make_dirprod; intro H.
     - use (hinhuniv _ (dirprod_pr1 H)); intro Ha.
@@ -105,12 +106,12 @@ Section spec.
         * exact Ha.
         * use (negf _ Hpx). intro Hpa.
           apply (transportb (λ y, p y) Hab).
-          apply (ideal_isr p b a), Hpa.
+          use (ideal_isr p b a). exact Hpa.
       + exists b. use make_dirprod.
         * exact Hb.
         * use (negf _ Hpx). intro Hpb.
           apply (transportb (λ y, p y) Hab).
-          apply (ideal_isl p a b), Hpb.
+          use (ideal_isl p a b). exact Hpb.
   Defined.
 
   Definition Spec : TopologicalSpace :=
@@ -194,7 +195,7 @@ Section section_commring.
     apply hinhpr. exists (V1 ∩ V2). use make_dirprod.
     - exact (make_dirprod Hp1 Hp2).
     - use make_dirprod.
-      + intros x Hx. apply (HU1 x), (dirprod_pr1 Hx).
+      + intros x Hx. use (HU1 x). exact (dirprod_pr1 Hx).
       + apply hinhpr. exists (g2 * f1 + g1 * f2), (g1 * g2). intros q HVq.
         use (hinhuniv _ (Hq1 q (dirprod_pr1 HVq))); intro Hg1.
         use (hinhuniv _ (Hq2 q (dirprod_pr2 HVq))); intro Hg2.
@@ -321,7 +322,7 @@ Section section_commring.
     apply hinhpr. exists (V1 ∩ V2). use make_dirprod.
     + exact (make_dirprod Hp1 Hp2).
     + use make_dirprod.
-      * intros x Hx. apply (HU1 x), (dirprod_pr1 Hx).
+      * intros x Hx. use (HU1 x). exact (dirprod_pr1 Hx).
       * apply hinhpr. exists (f1 * f2), (g1 * g2). intros q HVq.
         use (hinhuniv _ (Hq1 q (dirprod_pr1 HVq))); intro Hg1.
         use (hinhuniv _ (Hq2 q (dirprod_pr2 HVq))); intro Hg2.
@@ -590,7 +591,7 @@ Section structure_sheaf.
     use (hinhfun _ H0); intro H.
     exists (glue_sections g Hg H).
     intro U. apply funext_section.
-    intro q. induction q as [q HUq]. cbn.
+    intro q. induction q as [q HUq]; simpl.
     apply section_intersection, Hg.
   Qed.
 

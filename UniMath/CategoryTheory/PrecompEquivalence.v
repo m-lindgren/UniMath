@@ -27,6 +27,11 @@ Require Import UniMath.CategoryTheory.PrecategoryBinProduct.
 
 Local Open Scope cat.
 
+(* TODO : Enable Universe Checking.
+          This fails in [precomp_adjoint_equivalence], probably due
+          to some issue in [precomp_ess_surj.v]
+ *)
+Local Unset Universe Checking.
 Section PrecompEquivalence.
   Context {C₁ C₂ : category}
           (D : univalent_category)
@@ -39,7 +44,7 @@ Section PrecompEquivalence.
   Proof.
     use rad_equivalence_of_cats.
     - apply is_univalent_functor_category.
-      exact (pr2 D).
+      apply univalent_category_is_univalent.
     - exact (pre_composition_with_ess_surj_and_fully_faithful_is_fully_faithful
                C₁ C₂ D
                F

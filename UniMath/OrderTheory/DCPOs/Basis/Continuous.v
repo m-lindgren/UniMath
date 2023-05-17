@@ -67,7 +67,12 @@ Definition is_continuous_dcpo
   : hProp
   := ∥ continuous_dcpo_struct X ∥.
 
+(* TODO : Enable Universe Checking
+          [approximating_family_lub] and [unary_interpolation] are
+          very slow to type check. *)
+Local Unset Universe Checking.
 Section ContinuousDCPOAccessors.
+
   Context {X : dcpo}
           (CX : continuous_dcpo_struct X).
 
@@ -192,7 +197,7 @@ Section PropertiesContinuousDCPO.
       fold D.
       intro i.
       apply way_below_to_le.
-      apply (H (D i)).
+      use (H (D i)).
       apply approximating_family_way_below.
     - apply propproperty.
     - apply propproperty.
@@ -209,7 +214,7 @@ Section PropertiesContinuousDCPO.
   Proof.
     use weqimplimpl.
     - intro p.
-      apply (p (approximating_family CX y)).
+      use (p (approximating_family CX y)).
       rewrite approximating_family_lub.
       apply refl_dcpo.
     - use factor_through_squash.
@@ -332,7 +337,7 @@ Section PropertiesContinuousDCPO.
     Proof.
       assert (s : y ≤ ⨆ unary_interpolation_directed_set).
       {
-        apply continuous_dcpo_struct_approx_le_to_le.
+        use continuous_dcpo_struct_approx_le_to_le.
         intro i.
         use continuous_dcpo_struct_approx_le_to_le.
         intro j.

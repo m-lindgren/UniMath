@@ -45,7 +45,7 @@ Section FreeAlgebras.
     intro v.
     simpl.
     unfold eval, varterm.
-    apply fromtermstep'.
+    exact(fromtermstep' (ops a) α v).
   Defined.
 
   Definition iscontr_universalmap

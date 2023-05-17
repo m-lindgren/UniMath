@@ -280,7 +280,7 @@ Definition ε'ntiso : z_iso (C:= [D,D]) (G ∙ F) (functor_identity _ ).
 Proof.
   eapply z_iso_comp.
     set (XR := functor_on_z_iso GG (functor_on_z_iso FF εntiso)).
-    set (XR':= z_iso_inv_from_z_iso XR). apply XR'.
+    set (XR':= z_iso_inv_from_z_iso XR). use XR'.
   eapply z_iso_comp.
      2: apply εntiso.
   set (XR := functor_on_z_iso (pre_comp_functor G) (z_iso_inv_from_z_iso ηntiso)).
@@ -477,7 +477,7 @@ Defined.
 
 Definition rad_eps (b : ob B) : z_iso (F (rad_ob b)) b.
 Proof.
-  apply (pr2 (HS b (tpair (λ x, isaprop x) _
+  exact (pr2 (HS b (make_hProp _
                (isaprop_sigma_z_iso A B HA F HF b)) (λ x, x))).
 Defined.
 

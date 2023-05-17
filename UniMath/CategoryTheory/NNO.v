@@ -22,10 +22,10 @@ Local Notation "1" := TC.
 
 Definition isNNO (n : C) (z : C ⟦ 1, n ⟧) (s : C ⟦ n, n ⟧) : hProp.
 Proof.
-use tpair.
-- exact (∏ (a : C) (q : C ⟦ 1, a ⟧) (f : C ⟦ a, a ⟧),
-         ∃! u : C ⟦ n, a ⟧, (z · u = q) × (s · u = u · f)).
-- abstract (repeat (apply impred_isaprop; intros); apply isapropiscontr).
+  use make_hProp.
+  - exact (∏ (a : C) (q : C ⟦ 1, a ⟧) (f : C ⟦ a, a ⟧),
+            ∃! u : C ⟦ n, a ⟧, (z · u = q) × (s · u = u · f)).
+  - abstract (repeat (apply impred_isaprop; intros); apply isapropiscontr).
 Defined.
 
 Definition NNO : UU :=

@@ -167,7 +167,7 @@ Proof.
   induction X as [X p].
   induction X' as [X' p'].
   set (H := isofhlevelweqb n
-       (Id_p_weq_Id (λ X, (isofhlevel n X,, isapropisofhlevel _ _)) X X' p p')).
+       (Id_p_weq_Id (λ X, (make_hProp (isofhlevel n X) (isapropisofhlevel _ _))) X X' p p')).
   cbn in H.
   apply H.
   apply isofhlevelpathspace;
@@ -196,8 +196,7 @@ Corollary UA_for_HLevels : ∏ (n : nat) (X X' : HLevel n),
    (X = X') ≃ (pr1 X ≃ pr1 X').
 Proof.
   intros n [X pX] [X' pX'].
-  simpl.
   apply (UA_for_Predicates
-       (λ X, tpair isaprop (isofhlevel n X)
-                                      (isapropisofhlevel _ _))).
+           (λ X, make_hProp (isofhlevel n X)
+                   (isapropisofhlevel _ _))).
 Defined.

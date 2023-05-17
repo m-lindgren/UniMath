@@ -79,11 +79,13 @@ Require Export UniMath.Foundations.Propositions.
 
 
 (** ** The type of sets i.e. of types of h-level 2 in [UU] *)
+Definition hSet@{k l} : Type@{l}
+  := @total2@{l k l} Type@{k} isaset.
 
-Definition hSet : UU := total2 (λ X : UU, isaset X).
-Definition make_hSet (X : UU) (i : isaset X) := tpair isaset X i : hSet.
-Definition pr1hSet : hSet -> UU := @pr1 UU (λ X : UU, isaset X).
-Coercion pr1hSet: hSet >-> UU.
+Definition make_hSet (X : Type) (i : isaset X) : hSet
+  := (X ,, i).
+Definition pr1hSet : hSet -> Type := pr1.
+Coercion pr1hSet: hSet >-> Sortclass.
 
 Definition eqset {X : hSet} (x x' : X) : hProp
   := make_hProp (x = x') (pr2 X x x').
@@ -98,13 +100,18 @@ Definition setproperty (X : hSet) := pr2 X.
 
 Definition setdirprod (X Y : hSet) : hSet.
 Proof.
-  intros. exists (X × Y).
-  apply (isofhleveldirprod 2); apply setproperty.
+  use(make_hSet (X × Y)).
+  abstract (exact (isasetdirprod _ _ (setproperty X) (setproperty Y))).
 Defined.
+
+Declare Scope set.
+Delimit Scope set with set.
+Notation "A × B" := (setdirprod A B) (at level 75, right associativity) : set.
 
 Definition setcoprod (X Y : hSet) : hSet.
 Proof.
-  intros. exists (X ⨿ Y). apply isasetcoprod; apply setproperty.
+  use(make_hSet (X ⨿ Y)).
+  apply isasetcoprod; apply setproperty.
 Defined.
 
 Lemma isaset_total2_hSet (X : hSet) (Y : X -> hSet) : isaset (∑ x, Y x).
@@ -121,8 +128,6 @@ Definition hfiber_hSet {X Y : hSet} (f : X → Y) (y : Y) : hSet
   := make_hSet (hfiber f y) (isaset_hfiber f y (pr2 X) (pr2 Y)).
 
 
-Declare Scope set.
-Delimit Scope set with set.
 
 Notation "'∑' x .. y , P" := (total2_hSet (λ x,.. (total2_hSet (λ y, P))..))
   (at level 200, x binder, y binder, right associativity) : set.
@@ -142,17 +147,16 @@ Notation "'∏' x .. y , P" := (forall_hSet (λ x,.. (forall_hSet (λ y, P))..))
 
 Definition unitset : hSet := make_hSet unit isasetunit.
 
-Definition dirprod_hSet (X Y : hSet) : hSet.
-Proof.
-  exists (X × Y).
-  abstract (exact (isasetdirprod _ _ (setproperty X) (setproperty Y))).
-Defined.
-
-Notation "A × B" := (dirprod_hSet A B) (at level 75, right associativity) : set.
-
 (** *** [hProp] as a set *)
 
-Definition hPropset : hSet := tpair _ hProp isasethProp.
+(* The type of propositions at level {i j} is an element of hSet@{j k}
+   where j < k.
+ *)
+Definition hPropset : hSet
+  := make_hSet
+       hProp
+       isasethProp.
+
 (* Canonical Structure hPropset. *)
 
 Definition hProp_to_hSet (P : hProp) : hSet
@@ -167,11 +171,11 @@ Definition boolset : hSet := make_hSet bool isasetbool.
 
 Definition isInjectiveFunction {X Y : hSet} (f : X -> Y) : hProp.
 Proof.
-  intros. exists (∏ (x x': X), f x = f x' -> x = x').
+  use(make_hProp (∏ (x x': X), f x = f x' -> x = x')).
   abstract (
       intros; apply impred; intro x; apply impred; intro y;
       apply impred; intro e; apply setproperty)
-           using isaprop_isInjectiveFunction.
+    using isaprop_isInjectiveFunction.
 Defined.
 
 
@@ -274,15 +278,22 @@ Defined.
 
 (** *** General definitions *)
 
-Definition hsubtype (X : UU) : UU := X -> hProp.
+Definition hsubtype (X : Type) : Type
+  := X -> hProp.
 Identity Coercion id_hsubtype :  hsubtype >-> Funclass.
-Definition carrier {X : UU} (A : hsubtype X) := total2 A.
+
+(* Changing this to Type@{k} -> Type@{l} breaks CategoryTheory/Subobjects.v,
+   but makes AlgebraicGeometry/Spec.v compile in reasonable time.
+ *)
+Definition carrier {X : Type@{k}} (A : hsubtype X) : Type@{k}
+  := total2 A.
 Coercion carrier : hsubtype >-> Sortclass.
+
 Definition make_carrier {X : UU} (A : hsubtype X) :
-   ∏ t : X, A t → ∑ x : X, A x := tpair A.
+   ∏ t : X, A t → carrier A := tpair A.
 Definition pr1carrier {X : UU} (A : hsubtype X) := @pr1 _ _  : carrier A -> X.
 
-Lemma isaset_carrier_subset (X : hSet) (Y : hsubtype X) : isaset (∑ x, Y x).
+Lemma isaset_carrier_subset (X : hSet) (Y : hsubtype X) : isaset (carrier Y).
 Proof.
   intros. apply isaset_total2.
   - apply setproperty.
@@ -290,7 +301,7 @@ Proof.
 Defined.
 
 Definition carrier_subset {X : hSet} (Y : hsubtype X) : hSet
-  := make_hSet (∑ x, Y x) (isaset_carrier_subset X Y).
+  := make_hSet (carrier Y) (isaset_carrier_subset X Y).
 
 Declare Scope subset.
 Notation "'∑' x .. y , P"
@@ -1183,9 +1194,13 @@ Notation " 'ct' ( R , is , x , y ) " := (ctlong R is x y (idpath true))
 
 Definition deceq_to_decrel {X:UU} : isdeceq X -> decrel X.
 Proof.
-  intros i. use make_decrel.
-       - intros x y. exists (x=y). apply isasetifdeceq. assumption.
-       - exact i.
+  intros i.
+  use make_decrel.
+  - intros x y.
+    use(make_hProp (x = y)).
+    apply isasetifdeceq.
+    assumption.
+  - exact i.
 Defined.
 
 Definition confirm_equal {X : UU} (i : isdeceq X) (x x' : X)
@@ -1504,7 +1519,7 @@ Section LiftSurjection.
                                         (image (λ (x:hfiber p b), f (pr1 x))).
   Proof.
     intro b.
-    apply (squash_to_prop (surjectivep b)).
+    use (squash_to_prop (surjectivep b)).
     { apply isapropiscontr. }
     intro H.
     apply iscontraprop1.
@@ -2134,7 +2149,9 @@ Defined.
 Definition setquotbooleqint {X : UU} (R : eqrel X)
            (is : ∏ x x' : X, isdecprop (R x x')) (x x' : X) : bool.
 Proof.
-  intros. induction (pr1 (is x x')). apply true. apply false.
+  induction (pr1 (is x x')).
+  - apply true.
+  - apply false.
 Defined.
 
 Lemma setquotbooleqintcomp {X : UU} (R : eqrel X)

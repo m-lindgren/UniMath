@@ -34,7 +34,7 @@ Section Misc.
   Proof.
     intro H. apply funextfun; intro i; apply funextfun; intro j.
     specialize (H j). apply toforallpaths in H. apply H.
-  Defined.
+  Qed.
 End Misc.
 
 Section Vectors_as_Matrices.
@@ -49,7 +49,7 @@ Section Vectors_as_Matrices.
     : row_vec v1 = row_vec v2 -> v1 = v2.
   Proof.
     intros H; apply (invmaponpathsweq (@weq_rowvec X n)  _ _ H).
-  Defined.
+  Qed.
 
   Lemma weq_colvec
     : ∏ X : UU, ∏ n : nat, weq (Vector X n) (Matrix X n 1).
@@ -61,13 +61,13 @@ Section Vectors_as_Matrices.
     : col_vec v1 = col_vec v2 -> v1 = v2.
   Proof.
     intros H; apply (invmaponpathsweq (@weq_colvec X n)  _ _ H).
-  Defined.
+  Qed.
 
   Lemma col_vec_inj_pointwise { X : rig } { n : nat } (v1 v2 : Vector X n)
     : forall i : (stn n), (col_vec v1 i) = (col_vec v2 i) -> (v1 i) = (v2 i).
   Proof.
     intros i eq; apply (invmaponpathsweq (@weq_vector_1 X)  _ _ eq).
-  Defined.
+  Qed.
 
   Lemma col_vec_eq {X : UU} {n : nat} (v : Vector X n)
   : ∏ i : (stn 1), v = col (col_vec v) i.
@@ -98,7 +98,7 @@ Section Transposition.
   Proof.
     intros H. unfold col, row.
     exact (toforallpaths _ _ _ (!H) i).
-  Defined.
+  Qed.
 
 End Transposition.
 
@@ -424,7 +424,7 @@ Section Inverses.
       now rewrite matrunax2. }
     rewrite eq, <- matrix_mult_assoc, (pr2 (pr2 B)).
     now rewrite matlunax2.
-  Defined.
+  Qed.
 
   Lemma left_inv_matrix_prod_is_left_inv {m n : nat} (A : Matrix R m n)
     (A' : Matrix R n n) (pa : matrix_left_inverse A) (pb : matrix_left_inverse A') :

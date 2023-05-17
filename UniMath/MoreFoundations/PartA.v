@@ -403,13 +403,17 @@ Defined.
 (** ** Pointed types *)
 
 Section PointedTypes.
-  Definition PointedType := ∑ X, X.
-  Definition pointedType X x := X,,x : PointedType.
+  Definition PointedType : Type
+    := ∑ (X : Type), X.
+
+  Definition pointedType (X : Type) (x : X) : PointedType
+    := X ,, x.
+
   Definition underlyingType (X:PointedType) := pr1 X.
-  Coercion underlyingType : PointedType >-> UU.
-  Definition basepoint (X:PointedType) := pr2 X.
-  Definition loopSpace (X:PointedType) :=
-    pointedType (basepoint X = basepoint X) (idpath _).
+  Coercion underlyingType : PointedType >-> Sortclass.
+  Definition basepoint (X : PointedType) := pr2 X.
+  Definition loopSpace (X : PointedType) : PointedType
+    := pointedType (basepoint X = basepoint X) (idpath (basepoint X)).
   Definition underlyingLoop {X:PointedType} (l:loopSpace X) : basepoint X = basepoint X.
   Proof.
     intros. exact l.

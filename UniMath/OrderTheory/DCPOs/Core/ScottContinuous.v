@@ -262,7 +262,6 @@ Proof.
     + intro i.
       apply refl_PartialOrder.
     + intros z Hz.
-      cbn in *.
       induction HD as [ i HD ].
       revert i.
       use factor_through_squash.
@@ -416,7 +415,11 @@ Proof.
   exact (is_monotone_scott_continuous_map f p).
 Defined.
 
+(* TODO : Enable Universe Checking. The following section is very
+   slow to type check when universe checking is enabled. *)
+Local Unset Universe Checking.
 Section MakeScottContinuous.
+
   Context {X Y : dcpo}
           (f : X → Y)
           (Hf₁ : ∏ (x₁ x₂ : X), x₁ ≤ x₂ → f x₁ ≤ f x₂).
@@ -436,6 +439,7 @@ Section MakeScottContinuous.
       exact (Hf₂ (I ,, (D ,, HD))).
   Qed.
 End MakeScottContinuous.
+Local Set Universe Checking.
 
 Proposition scott_continuous_map_on_lub
             {X Y : dcpo}

@@ -28,7 +28,7 @@ Local Open Scope wosubset.
 
 Definition TotalOrdering (S:hSet) : hSet := ∑ (R : hrel_set S), hProp_to_hSet (isTotalOrder R).
 
-Definition TOSubset_set (X:hSet) : hSet := ∑ (S:subtype_set X), TotalOrdering (carrier_subset S).
+Definition TOSubset_set (X:hSet@{k l}) : hSet@{k l} := ∑ (S:subtype_set X), TotalOrdering (carrier_subset S).
 
 Definition TOSubset (X:hSet) : UU := TOSubset_set X.
 
@@ -121,7 +121,7 @@ Proof.
     apply hinhpr.
     exists B.
     split.
-    + apply (BSi x s Bx Ss). now apply (h1'' le).
+    + use (BSi x s Bx Ss). now apply (h1'' le).
     + exact (BS,,BT,,BSi,,BTi,,BST). }
   split.
   { intros x t M Tt le.
@@ -130,7 +130,7 @@ Proof.
     apply hinhpr.
     exists B.
     split.
-    + apply (BTi x t Bx Tt). now apply (h1'' le).
+    + use (BTi x t Bx Tt). now apply (h1'' le).
     + exact (BS,,BT,,BSi,,BTi,,BST). }
   intros x y.
   split.
@@ -138,7 +138,7 @@ Proof.
     apply (squash_to_hProp xm); intros [B [Bx [BS [BT [BSi [BTi BST]]]]]].
     apply (squash_to_hProp ym); intros [C [Cy [CS [CT [CSi [CTi CST]]]]]].
     assert (Cx : C x).
-    { apply (CSi y x Cy (BS x Bx)). now apply (h1'' le). }
+    { use (CSi y x Cy (BS x Bx)). now apply (h1'' le). }
     assert (Q := pr1 (CST (x,,Cx) (y,,Cy))); simpl in Q.
     assert (E : subtype_inc CS (x,, Cx) ≤ subtype_inc CS (y,, Cy)).
     { now apply (h1'' le). }
@@ -147,7 +147,7 @@ Proof.
     apply (squash_to_hProp xm); intros [B [Bx [BS [BT [BSi [BTi BST]]]]]].
     apply (squash_to_hProp ym); intros [C [Cy [CS [CT [CSi [CTi CST]]]]]].
     assert (Cx : C x).
-    { apply (CTi y x Cy (BT x Bx)). now apply (h1'' le). }
+    { use (CTi y x Cy (BT x Bx)). now apply (h1'' le). }
     assert (Q := pr2 (CST (x,,Cx) (y,,Cy))); simpl in Q.
     assert (E : subtype_inc CT (x,, Cx) ≤ subtype_inc CT (y,, Cy)).
     { now apply (h1'' le). }
@@ -161,7 +161,7 @@ Proof.
   { exact (pr2 le s s'). }
   { intro l. apply (squash_to_hProp (TOtot S s s')). intros [c|c].
     - exact c.
-    - apply (TOeq_to_refl S s s'). assert (k := pr2 le _ _ c); clear c.
+    - use (TOeq_to_refl S s s'). assert (k := pr2 le _ _ c); clear c.
       assert (k' := TOanti T _ _ l k); clear k l.
       apply subtypePath_prop. exact (maponpaths pr1 k'). }
 Defined.
@@ -339,7 +339,7 @@ Definition isWellOrder {X : hSet} (R : hrel X) : hProp := isTotalOrder R ∧ has
 
 Definition WellOrdering (S:hSet) : hSet := ∑ (R : hrel_set S), hProp_to_hSet (isWellOrder R).
 
-Definition WOSubset_set (X:hSet) : hSet := ∑ (S:subtype_set X), WellOrdering (carrier_subset S).
+Definition WOSubset_set (X : hSet@{k l}) : hSet@{k l} := ∑ (S:subtype_set X), WellOrdering (carrier_subset S).
 
 Definition WOSubset (X:hSet) : UU := WOSubset_set X.
 
@@ -522,7 +522,7 @@ Proof.
         { apply propproperty. }
         { apply propproperty. } }
   { apply wosub_univalence_map. }
-  { intros e. induction e. reflexivity. }
+  { intros e. destruct e. apply idpath. }
 Defined.
 
 Lemma wosub_univalence_compute {X:hSet} (S T : WOSubset X) (e : S = T) :
@@ -613,7 +613,7 @@ Proof.
     generalize lt; clear lt.
     apply negf.
     intros le'.
-    apply (pr2 (wosub_fidelity ST (x,, Sx) (y,, Sy))).
+    use (pr2 (wosub_fidelity ST (x,, Sx) (y,, Sy))).
     now apply (h1'' (S := T) le').
   - intros [Ty lt].
     assert (Q := wosub_le_subi ST x y Sx Ty); simpl in Q.
@@ -724,10 +724,10 @@ Proof.
   apply (squash_to_hProp (chain i j)). intros [c|c].
   - split.
     + intro l. assert (q := wosub_le_comp c _ _ l); clear l. now apply (h1'' q).
-    + intro l. apply (pr2 ((wosub_fidelity c) (x,,xi) (y,,yi))).
+    + intro l. use (pr2 ((wosub_fidelity c) (x,,xi) (y,,yi))).
       now apply (@h1'' X (S j) _ _ _ _ l).
   - split.
-    + intro l. apply (pr2 ((wosub_fidelity c) (x,,xj) (y,,yj))).
+    + intro l. use (pr2 ((wosub_fidelity c) (x,,xj) (y,,yj))).
       now apply (@h1'' X (S i) _ _ _ _ l).
     + intro l. assert (q := wosub_le_comp c _ _ l); clear l. now apply (h1'' q).
 Defined.
@@ -857,7 +857,7 @@ Proof.
   intros [j [[ij [com ini]] tinSj]]. set (t' := (pr1 t,,tinSj) : S j). unfold sub_initial in ini.
   assert (K := ini (pr1 s) (pr1 t') (pr2 s) (pr2 t')); simpl in K. change (t' ≤ subtype_inc ij s → t ∈ S i) in K.
   apply K; clear K. unfold tosub_order_compat in com.
-  apply (pr2 (tosub_fidelity (chain_union_tosub_le Schain j) t' (subtype_inc ij s))).
+  use (pr2 (tosub_fidelity (chain_union_tosub_le Schain j) t' (subtype_inc ij s))).
   clear com ini.
   assert (p : t = subtype_inc (pr1 (chain_union_tosub_le _ j)) t').
   { now apply subtypePath_prop. }
@@ -894,7 +894,7 @@ Proof.
     assert (E : subtype_inc (subtype_union_containedIn S j) t' = t).
     { now apply subtypePath_prop. }
     rewrite <- E. unfold t0'.
-    apply (pr2 (chain_union_tosub_le chain j) t0 t'). apply (t0min t').
+    use (pr2 (chain_union_tosub_le chain j) t0 t'). use (t0min t').
     unfold T'. rewrite E. exact tinT.
 Defined.
 
@@ -928,7 +928,7 @@ Definition upto' {X:hSet} {C:WOSubset X} (c:C) : proper_subtypes_set X.
 Proof.
   exists (upto c). apply hinhpr. exists (pr1 c). intro n.
   simpl in n. induction n as [n o]. apply o; clear o.
-  apply (TOeq_to_refl C _ _). now apply subtypePath_prop.
+  use (TOeq_to_refl C _ _). now apply subtypePath_prop.
 Defined.
 
 (** ** Choice functions *)
@@ -999,7 +999,7 @@ Proof.
     apply (squash_to_hProp p); clear p; intros [c cE].
     apply (squash_to_hProp q); clear q; intros [d dE].
     assert (ce : W = upto c).
-    { now apply (invmap (hsubtype_univalence _ _)). }
+    { now use (invmap (hsubtype_univalence _ _)). }
     assert (de : W = upto d).
     { now apply (invmap (hsubtype_univalence _ _)). }
     assert (cd := !ce @ de : upto c = upto d).
@@ -1067,7 +1067,7 @@ Proof.
       split.
       { intros w' c' W'w' Cc' le.
         apply (squash_to_hProp W'w'); intros B. induction B as [Ww'|e].
-        - apply hinhpr, ii1. apply (WCi w' c' Ww' Cc'). now apply (h1'' le).
+        - apply hinhpr, ii1. use (WCi w' c' Ww' Cc'). now apply (h1'' le).
         - induction e.
           induction (lem (pr1 c = c')) as [e|ne].
           + induction e. exact W'c.
@@ -1080,7 +1080,7 @@ Proof.
       split.
       { intros w' d' W'w' Dd' le.
         apply (squash_to_hProp W'w'); intros B. induction B as [Ww'|e].
-        - apply hinhpr, ii1. apply (WDi w' d' Ww' Dd'). now apply (h1'' le).
+        - apply hinhpr, ii1. use (WDi w' d' Ww' Dd'). now apply (h1'' le).
         - induction e.
           induction (lem (pr1 d = d')) as [e|ne].
           + induction e. exact W'd.
@@ -1151,7 +1151,7 @@ Proof.
     use tpair.
     { exact WD. }
     split.
-    { intros x y le. apply (pr1 (WCD x y)). now apply (h1'' le). }
+    { intros x y le. use (pr1 (WCD x y)). now apply (h1'' le). }
     exact WDi.
   - apply ii2.
     assert (e : W = D).
@@ -1161,7 +1161,7 @@ Proof.
     use tpair.
     { exact WC. }
     split.
-    { intros x y le. apply (pr2 (WCD x y)). now apply (h1'' le). }
+    { intros x y le. use (pr2 (WCD x y)). now apply (h1'' le). }
     exact WCi.
   Unset Printing Coercions.
 Defined.

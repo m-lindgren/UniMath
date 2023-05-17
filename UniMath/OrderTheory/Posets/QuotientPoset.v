@@ -32,6 +32,12 @@ Definition downward_closed
 (**
  2. The quotient of posets
  *)
+
+(* TODO : Enable Universe Checking
+
+   [isantisymm_quotient_lower_set_order] does not compile currently.
+ *)
+Unset Universe Checking.
 Section PosetQuotientLowerSet.
   Context {X : hSet}
           (RX : PartialOrder X)

@@ -146,7 +146,7 @@ Lemma po_reverse_correct {X : UU} (l : po X) :
   ∏ x y : X, po_reverse l x y = l y x.
 Proof.
   intros x y.
-  now apply paths_refl.
+  now apply idpath.
 Qed.
 
 Lemma issymm_reverse {X : UU} (l : hrel X) :
@@ -170,7 +170,7 @@ Lemma eqrel_reverse_correct {X : UU} (l : eqrel X) :
   ∏ x y : X, eqrel_reverse l x y = l y x.
 Proof.
   intros x y.
-  now apply paths_refl.
+  now apply idpath.
 Qed.
 
 Lemma isirrefl_reverse {X : UU} (l : hrel X) :
@@ -201,7 +201,7 @@ Lemma StrongOrder_reverse_correct {X : UU} (l : StrongOrder X) :
   ∏ x y : X, StrongOrder_reverse l x y = l y x.
 Proof.
   intros x y.
-  now apply paths_refl.
+  now apply idpath.
 Qed.
 
 Lemma isasymm_reverse {X : UU} (l : hrel X) :

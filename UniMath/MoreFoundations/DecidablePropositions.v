@@ -168,7 +168,7 @@ Proof. intros lem is x y. exact (lem (make_hProp (x = y) (is x y))). Defined.
 
 Lemma isaprop_LEM : isaprop LEM.
 Proof.
-  unfold LEM. apply impred_isaprop; intro P. apply isapropdec. apply propproperty.
+  unfold LEM. use impred_isaprop. intro P. apply isapropdec. apply propproperty.
 Defined.
 
 Lemma dneg_LEM (P : hProp) : LEM -> ¬¬ P -> P.
@@ -218,7 +218,7 @@ Proof. apply pr2. Defined.
 Definition DecidableProposition_to_hProp : DecidableProposition -> hProp.
 Proof.
   intros X.
-  exact (pr1 X,, isdecproptoisaprop (pr1 X) (pr2 X)).
+  exact(make_hProp (pr1 X) (isdecproptoisaprop (pr1 X) (pr2 X))).
 Defined.
 Coercion DecidableProposition_to_hProp : DecidableProposition >-> hProp.
 Definition decidabilityProperty (X : DecidableProposition) :

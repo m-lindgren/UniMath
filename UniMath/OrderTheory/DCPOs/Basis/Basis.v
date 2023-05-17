@@ -247,6 +247,10 @@ Proof.
   - exact (basis_laws_from_continuous_struct CX).
 Defined.
 
+(* TODO : Enable Universe Checking
+          [dcpo_basis_le_via_approximation] is slow to type check.
+ *)
+Local Unset Universe Checking.
 Section BasisProperties.
   Context {X : dcpo}
           (B : dcpo_basis X).

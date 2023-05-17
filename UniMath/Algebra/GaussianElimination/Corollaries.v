@@ -113,7 +113,7 @@ Section BackSub.
       now rewrite (@rigcomm2 F), (@ringplusminus F). }
     rewrite (@rigcomm1 F); rewrite (@rigassoc1 F).
     now rewrite (@ringlinvax1 F), (@rigrunax1 F).
-  Defined.
+  Qed.
 
   (** [back_sub_step] only modifies target element *)
   Lemma back_sub_step_inv1
@@ -130,7 +130,7 @@ Section BackSub.
       try apply idpath.
     rewrite eq in ne.
     contradiction (isirrefl_natneq _ ne).
-  Defined.
+  Qed.
 
   Lemma back_sub_step_inv2
     { n : nat }
@@ -161,7 +161,7 @@ Section BackSub.
     - rewrite (stn_eq _ _ eq)
       , back_sub_step_inv0; try assumption.
       now rewrite H.
-  Defined.
+  Qed.
 
   (** Back-substituting repeatedly using step procedure defined earlier.
       Carries an additional [row] parameter that allows for partially applying the substition,
@@ -207,7 +207,7 @@ Section BackSub.
     {apply maponpaths_2, maponpaths, proofirrelevance, propproperty. }
     apply natgthtoneq.
     refine (natlthlehtrans _ _ _ lt i_lt_row).
-  Defined.
+  Qed.
 
   Lemma back_sub_internal_inv1
     { n : nat }
@@ -224,7 +224,7 @@ Section BackSub.
       (back_sub_internal mat x b sep row) x i).
     - apply idpath.
     - now apply (back_sub_internal_inv0).
-  Defined.
+  Qed.
 
   Lemma back_sub_internal_inv2
     { n : nat }
@@ -264,7 +264,7 @@ Section BackSub.
         now rewrite back_sub_step_inv0.
       + rewrite <- (stn_eq _ _ eq) in lt.
         contradiction (isirreflnatlth _ (natlthlehtrans _ _ _ lt contr_geh)).
-  Defined.
+  Qed.
 
   Definition back_sub
     {n : nat}
@@ -479,7 +479,7 @@ Section BackSubZero.
             try reflexivity.
           rewrite (stn_eq _ _ eq) in * |-.
           contradiction (isirrefl_natneq k).
-  Defined.
+  Qed.
 
 End BackSubZero.
 
@@ -552,7 +552,7 @@ Section Misc.
           reflexivity.
         * try apply (natlehlthtrans _ _ _ contr_gt lt).
           apply natgehsntogth; rewrite u_lt, eq'; apply isreflnatleh.
-  Defined.
+  Qed.
 
   Lemma row_echelon_to_upper_triangular
     { m n : nat }
@@ -568,7 +568,7 @@ Section Misc.
     use tpair; intros i_1 i_2 j_1 j_2; intros; simpl.
     - destruct (H i_1 i_2) as [H1 _]; now rewrite (H1 j_2 j_1).
     - destruct (H i_1 i_2) as [_ H2]; now rewrite H2.
-  Defined.
+  Qed.
 
 End Misc.
 
@@ -627,7 +627,7 @@ Section Inverse.
       destruct (natchoice0 n) as [eq | ?].
       {apply fromstn0; now rewrite eq. }
       apply (back_sub_inv _ _ _ _ ut df).
-  Defined.
+  Qed.
 
   Lemma matrix_left_inverse_implies_right { n : nat } (A B: Matrix F n n)
     : (B ** A) = (@identity_matrix F n)
@@ -637,19 +637,19 @@ Section Inverse.
     destruct (natchoice0 n) as [eq0 | gt]. { destruct eq0; now use tpair. }
     pose (C := pr1 (gaussian_elimination _ A)).
     pose (is_gauss := pr2 (gaussian_elimination _ A)).
-    destruct is_gauss as [inv is_re].
+    pose (inv := pr12 (gaussian_elimination _ A)).
+    pose (is_re := pr22 (gaussian_elimination _ A)).
     pose (CA := C ** A).
     pose (D := @upper_triangular_right_inverse_construction _ CA).
     exists (D ** C).
     assert (CA_ut : is_upper_triangular CA).
-    { apply (@row_echelon_to_upper_triangular _ _ _ CA), is_re. }
+    { apply (@row_echelon_to_upper_triangular _ _ _ CA); apply is_re. }
     assert (nonz : @diagonal_all_nonzero F _ CA).
-    { apply left_invertible_upper_triangular_to_diagonal_all_nonzero;
-      try assumption.
-      apply left_inv_matrix_prod_is_left_inv.
-      - exists (pr1 inv).
-        apply (pr2 (pr2 inv)).
-      - now exists B.
+    {
+          apply left_invertible_upper_triangular_to_diagonal_all_nonzero;
+          try assumption;
+          apply left_inv_matrix_prod_is_left_inv;[exists(pr1 inv) | now exists B];
+          apply(pr2 (pr2 inv)).
     }
     pose (invmat := @matrix_right_inverse_construction_inv _ _ CA_ut nonz).
     unfold CA in invmat.
@@ -667,7 +667,7 @@ Section Inverse.
       set (constr := (upper_triangular_right_inverse_construction
         (@matrix_mult F _ _ C _ A))).
       assert (eq: (@matrix_mult F _ _ A n constr) = (pr1 gauss_mat)).
-      { apply pathsinv0. apply (left_inv_eq_right_app). }
+      { apply pathsinv0; apply (left_inv_eq_right_app). }
       rewrite eq.
       apply gauss_mat.
     }

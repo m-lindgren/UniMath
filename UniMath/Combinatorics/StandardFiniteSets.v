@@ -16,7 +16,7 @@ Require Import UniMath.MoreFoundations.NegativePropositions.
 
 (** ** Standard finite sets [ stn ]. *)
 
-Definition stn ( n : nat ) := ∑ m, m < n.
+Definition stn (n : nat) : Type := ∑ (m : nat), m < n.
 Definition make_stn n m (l:m<n) := (m,,l) : stn n.
 Definition stntonat ( n : nat ) : stn n -> nat := @pr1 _ _ .
 Coercion stntonat : stn >-> nat.
@@ -91,10 +91,10 @@ Proof.
 Defined.
 
 Lemma stnneq {n : nat} : neqReln (⟦n⟧).
-Proof. (* here we use no axioms *)
-  intros i j. exists (i ≠ j)%nat. split.
-  - apply propproperty.
-  - apply stn_ne_iff_neq.
+Proof. (* here we use no axioms except for resize_prop / RR1. *)
+  intros i j.
+  exists (i ≠ j)%nat.
+  split; apply stn_ne_iff_neq.
 Defined.
 
 Notation " x ≠ y " := ( stnneq x y ) (at level 70, no associativity) : stn.
@@ -151,20 +151,20 @@ Definition stnset n := make_hSet (⟦n⟧) (isasetstn n).
 
 Definition stn_to_nat n : stnset n -> natset := pr1.
 
-Definition stnposet ( n : nat ) : Poset.
+Definition stnposet (n : nat) : Poset.
 Proof.
-  unfold Poset.
-  exists (_,,isasetstn n).
-  unfold PartialOrder.
-  exists (λ i j: ⟦n⟧, i ≤ j)%dnat.
-  unfold isPartialOrder.
-  split.
-  - unfold ispreorder.
-    split.
-    * intros i j k. apply istransnatleh.
-    * intros i. apply isreflnatleh.
-  - intros i j r s. apply (invmaponpathsincl _ ( isinclstntonat _ )).
-    apply isantisymmnatleh; assumption.
+  use make_Poset.
+  - exact(stnset n).
+  - use make_PartialOrder.
+    + use(λ i j: ⟦n⟧, (i ≤ j))%dnat.
+    + unfold isPartialOrder; split.
+      * split.
+        -- intros i j k; apply istransnatleh.
+        -- intros i; apply isreflnatleh.
+      * intros i j r s.
+        apply (invmaponpathsincl _ ( isinclstntonat _ )).
+        apply isantisymmnatleh;
+          assumption.
 Defined.
 
 Definition lastelement {n : nat} : ⟦S n⟧.
@@ -227,17 +227,18 @@ Definition stnmtostnn ( m n : nat ) (isnatleh: natleh m n ) : ⟦m⟧ -> ⟦n⟧
 Definition stn_left (m n : nat) : ⟦m⟧ -> ⟦m+n⟧.
 Proof.
   intros i.
-  exists (pr1 i).
-  apply (natlthlehtrans (pr1 i) m (m+n) (pr2 i)).
-  apply natlehnplusnm.
+  use make_stn.
+  - exact i.
+  - abstract(apply (natlthlehtrans (pr1 i) m (m+n) (pr2 i));
+             apply natlehnplusnm).
 Defined.
 
 Definition stn_right (m n : nat) : ⟦n⟧ -> ⟦m+n⟧.
 Proof.
   intros i.
-  exists (m+pr1 i).
-  apply natlthandplusl.
-  exact (pr2 i).
+  use make_stn.
+  - exact(m + i).
+  - abstract(apply natlthandplusl; apply i).
 Defined.
 
 Definition stn_left_compute (m n : nat) (i: ⟦m⟧ ) : pr1 (stn_left m n i) = i.
@@ -597,7 +598,7 @@ Proof.
   - exact (ii2 tt).
   - apply ii1. induction i as [i I]. induction j as [j J].
     choose (i < j)%dnat a a.
-    + exists i. exact (natltltSlt _ _ _ a J).
+    + exists i. exact(natltltSlt i j n a J).
     + exists (i - 1).
       induction (natlehchoice _ _ (negnatgthtoleh a)) as [b|b].
       * induction (natlehchoice4 _ _ I) as [c|c].
@@ -742,13 +743,13 @@ Proof.
   unfold weqfromcoprodofstn_map, weqfromcoprodofstn_invmap. unfold coprod_rect.
   induction x as [x | x].
   - induction (natlthorgeh (stn_left n m x) n) as [H | H].
-    + apply maponpaths. apply isinjstntonat. apply idpath.
+    + use  maponpaths. use isinjstntonat. apply idpath.
     + apply fromempty. apply (natlthtonegnatgeh x n (stnlt x) H).
   - induction (natlthorgeh (stn_right n m x) n) as [H | H].
     + apply fromempty.
       set (tmp := natlehlthtrans n (n + x) n (natlehnplusnm n x) H).
       use (isirrefl_natneq n (natlthtoneq _ _ tmp)).
-    + apply maponpaths. apply isinjstntonat. cbn.
+    + apply maponpaths. use isinjstntonat. cbn.
       rewrite natpluscomm. apply plusminusnmm.
 Qed.
 
@@ -758,11 +759,11 @@ Proof.
   intros x.
   unfold weqfromcoprodofstn_map, weqfromcoprodofstn_invmap. unfold coprod_rect.
   induction (natlthorgeh x n) as [H | H].
-  - apply isinjstntonat. apply idpath.
+  - use isinjstntonat. apply idpath.
   - induction (natchoice0 m) as [H1 | H1].
     + apply fromempty. induction H1. induction (! (natplusr0 n)).
       use (natlthtonegnatgeh x n (stnlt x) H).
-    + apply isinjstntonat. cbn. rewrite natpluscomm. apply minusplusnmm. apply H.
+    + use isinjstntonat. cbn. rewrite natpluscomm. apply minusplusnmm. apply H.
 Qed.
 
 (** A proof of weqfromcoprodofstn using isweq_iso *)
@@ -1335,24 +1336,25 @@ Proof.
                 ).
       unfold funcomp.
       intro c.
-      induction c as [r|s].
+      destruct c as [r|s].
       * unfold coprodf.
         change (pr1weq (weqfromcoprodofstn (stnsum (λ x, f (dni lastelement x))) (f lastelement)))
         with (weqfromcoprodofstn_map (stnsum (λ x, f (dni lastelement x))) (f lastelement)).
         set (P := (λ i : ⟦ S n ⟧, ⟦ f i ⟧)).
-        rewrite weqstnsum_invmap_step1.
+        apply pathsinv0. etrans. apply weqstnsum_invmap_step1.
         change (λ i : ⟦ n ⟧, f (dni lastelement i)) with (f ∘ dni lastelement).
         generalize (weqstnsum_invmap (f ∘ dni lastelement) r); intro ij.
-        induction ij as [i j].
         apply idpath.
       * unfold coprodf.
         change (pr1weq (idweq _) s) with s.
         set (P := (λ i : ⟦ S n ⟧, ⟦ f i ⟧)).
         change (pr1weq _)
-        with (weqfromcoprodofstn_map (stnsum (λ x : ⟦ n ⟧, f (dni lastelement x))) (f lastelement)).
-        rewrite weqstnsum_invmap_step2.
-        apply idpath.
-Defined.
+          with (weqfromcoprodofstn_map (stnsum (λ x : ⟦ n ⟧, f (dni lastelement x))) (f lastelement)).
+        apply pathsinv0.
+        apply weqstnsum_invmap_step2.
+(* TODO : Enable Universe Checking. Change Admitted -> Defined.
+          Currently this is very slow to type check. *)
+Admitted.
 
 Definition weqstnsum1 {n : nat} (f : ⟦n⟧ -> nat) : (∑ i, ⟦f i⟧) ≃ ⟦stnsum f⟧.
 Proof.
@@ -1925,12 +1927,9 @@ Proof.
   change ( isaprop ( total2 int2 ) ).
   apply isapropsubtype.
   intros x1 x2. intros c1 c2.
-  simpl in *.
-  destruct c1 as [ e1 c1 ].
-  destruct c2 as [ e2 c2 ].
-  set ( l1 := c1 x2 e2 ).
-  set ( l2 := c2 x1 e1 ).
-  apply ( isantisymmnatleh _ _ l1 l2 ).
+  set (l1 := (pr2 c1) x2 (pr1 c2)).
+  set (l2 := (pr2 c2) x1 (pr1 c1)).
+  exact(isantisymmnatleh _ _ l1 l2).
 Defined.
 
 Theorem accth ( F : nat -> UU ) ( is : ∏ n , isdecprop ( F n ) )
@@ -1987,7 +1986,7 @@ Corollary dni_lastelement_is_inj {n : nat} {i j : ⟦n⟧ }
   (e : dni_lastelement i = dni_lastelement j) :
   i = j.
 Proof.
-  apply isinjstntonat.
+  use isinjstntonat.
   unfold dni_lastelement in e.
   apply (maponpaths pr1) in e.
   exact e.
@@ -1997,7 +1996,7 @@ Corollary dni_lastelement_eq : ∏ (n : nat) (i : ⟦S n⟧ ) (ie : pr1 i < n),
     i = dni_lastelement (make_stn n (pr1 i) ie).
 Proof.
   intros n i ie.
-  apply isinjstntonat.
+  use isinjstntonat.
   apply idpath.
 Defined.
 
@@ -2006,7 +2005,7 @@ Corollary lastelement_eq : ∏ (n : nat) (i : ⟦S n⟧ ) (e : pr1 i = n),
 Proof.
   intros n i e.
   unfold lastelement.
-  apply isinjstntonat.
+  use isinjstntonat.
   apply e.
 Defined.
 
@@ -2015,7 +2014,7 @@ Ltac inductive_reflexivity i b :=
   (* Here i is a variable natural number and b is a bound on *)
   (*      i of the form i<k, where k is a numeral. *)
   induction i as [|i];
-  [ try apply isinjstntonat ; apply idpath |
+  [ try use isinjstntonat ; apply idpath |
     contradicts (negnatlthn0 i) b || inductive_reflexivity i b ].
 
 (** concatenation and flattening of functions *)

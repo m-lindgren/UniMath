@@ -2,25 +2,27 @@ Require Export UniMath.Foundations.All.
 
 (** *** Propositions equivalent to negations of propositions *)
 
-Definition negProp P := ∑ Q, isaprop Q × (¬P <-> Q).
+Definition negProp (P : Type) : Type
+  := ∑ (Q : hProp), (¬ P <-> Q).
 
-Definition negProp_to_isaprop {P} (nP : negProp P) : isaprop (pr1 nP)
-  := pr1 (pr2 nP).
+Definition negProp_to_type {P : Type} (negP : negProp P) : Type
+  := pr1 negP.
+Coercion negProp_to_type : negProp >-> Sortclass.
 
-Definition negProp_to_hProp {P : UU} (Q : negProp P) : hProp.
-Proof.
-  intros. exists (pr1 Q). apply negProp_to_isaprop.
-Defined.
+Definition negProp_to_isaprop {P : Type} (nP : negProp P) : isaprop nP
+  := propproperty (pr1 nP).
+
+Definition negProp_to_hProp {P : Type} (Q : negProp P) : hProp
+  := pr1 Q.
 Coercion negProp_to_hProp : negProp >-> hProp.
 
-Definition negProp_to_iff {P} (nP : negProp P) : ¬P <-> nP
-  := pr2 (pr2 nP).
+Definition negProp_to_iff {P : Type} (nP : negProp P) : ¬P <-> nP
+  := pr2 nP.
 
 Definition negProp_to_neg {P} {nP : negProp P} : nP -> ¬P.
 Proof.
   intros np. exact (pr2 (negProp_to_iff nP) np).
 Defined.
-
 Coercion negProp_to_neg : negProp >-> Funclass.
 
 Definition neg_to_negProp {P} {nP : negProp P} : ¬P -> nP.
@@ -38,22 +40,21 @@ Definition neqPred {X:UU} (x  :X) := ∏ y,       negProp (x=y).
 
 Definition neqReln (X:UU)         := ∏ (x y:X), negProp (x=y).
 
-Lemma negProp_to_complementary P : ∏ (Q : negProp P), P ⨿ Q <-> complementary P Q.
+Lemma negProp_to_complementary (P : Type) : ∏ (Q : negProp P), P ⨿ Q <-> complementary P Q.
 Proof.
-  intros [Q [i [r s]]]; simpl in *.
+  intros [Q [npq qnp]].
   split.
-  * intros pq. split.
-    - intros p q. apply s.
-      + assumption.
-      + assumption.
-    - assumption.
-      * intros [j c].
-        assumption.
+  - intros pq.
+    split.
+    + intros ; apply qnp; assumption.
+    + assumption.
+  - intros [j c]. exact c.
 Defined.
 
 Lemma negProp_to_uniqueChoice P : ∏ (Q:negProp P), (isaprop P × (P ⨿ Q)) <-> iscontr (P ⨿ Q).
 Proof.
-  intros [Q [j [r s]]]; simpl in *. split.
+  intros [Q [r s]].
+  split.
   * intros [i v]. exists v. intro w.
     induction v as [v|v].
     - induction w as [w|w].
@@ -61,7 +62,7 @@ Proof.
       + contradicts (s w) v.
     - induction w as [w|w].
       + contradicts (s v) w.
-      + apply maponpaths, j.
+      + apply maponpaths, propproperty.
   * intros [c e]. split.
     - induction c as [c|c].
       + apply invproofirrelevance; intros p p'.
@@ -128,11 +129,10 @@ Definition pr1compl_ne (X : UU) (x : X) (neq_x : neqPred x)
            (c : compl_ne X x neq_x) :
   X := pr1 c.
 
-Definition make_negProp {P : UU} : negProp P.
+Definition make_negProp {P : Type} : negProp P.
 Proof.
-  intros. exists (¬ P). split.
-       - apply isapropneg.  (* uses [funextemptyAxiom] *)
-       - apply isrefl_logeq.
+  exists(hneg P).
+  apply isrefl_logeq.
 Defined.
 
 Definition make_neqProp {X : UU} (x y : X) : neqProp x y.
@@ -242,7 +242,8 @@ Proof.
        {induction (ii2 ne') as [eq|neq'].
         {simpl. contradicts eq ne'. }
         {simpl. apply maponpaths. unfold make_compl_ne. apply maponpaths.
-         apply proofirrelevance. exact (pr1 (pr2 (neq_x y))). }}
+         apply proofirrelevance, propproperty. }
+       }
      + induction u. unfold f,g,invrecompl_ne;simpl.
        induction (is x) as [eq|neq].
        {simpl. apply idpath. }
@@ -275,7 +276,7 @@ Proof.
     {simpl. apply idpath. }
     intros z; induction z as [z e]; induction z as [z neq];
       induction e; simpl in *.
-    induction (proofirrelevance _ (pr1 (pr2 (neq_x z))) neq
+    induction (proofirrelevance _ (propproperty (pr1 (neq_x z))) neq
                                 (neg_to_negProp ne)).
     apply idpath.
   }}
@@ -294,7 +295,7 @@ Proof.
                                    ∘ weqcoprodf (compl_ne_weq_compl X x neq_x)
                                    (idweq unit))%weq).
   {intro y. induction y as [y|t]; apply idpath. }
-  apply weqproperty.
+  use weqproperty.
 Defined.
 
 Lemma iscotrans_to_istrans_negReln {X : UU} {R : hrel X} (NR : negReln R) :
@@ -309,9 +310,7 @@ Defined.
 
 Definition natneq (m n : nat) : negProp (m = n).
 Proof.
-  intros. exists (m ≠ n). split.
-  - apply propproperty.
-  - apply natneq_iff_neq.
+  exists (m ≠ n). split; apply natneq_iff_neq.
 Defined.
 
 (* this replaces an earlier notation: *)

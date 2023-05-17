@@ -23,16 +23,9 @@ Require Import UniMath.Algebra.Groups.
 Require Export UniMath.Algebra.RigsAndRings.
 Require Export UniMath.NumberSystems.NaturalNumbersAlgebra.
 
-
-(** Upstream *)
-
-
-
-
 (** ** The commutative ring [ hz ] of integres *)
 
 (** *** General definitions *)
-
 
 Definition hz : commring := commrigtocommring natcommrig .
 Definition hzaddabgr : abgr := hz .
@@ -720,7 +713,7 @@ Proof. assert ( int : ∏ n m , isaprop ( hzgth n m -> hzgeh n ( m + 1 )  ) ) .
        intros x x' .  change ( R x x' -> ( neg ( R ( @op ( abmonoiddirprod (rigaddabmonoid natcommrig) (rigaddabmonoid natcommrig) ) x' ( make_dirprod 1%nat 0%nat ) ) x ) ) ) .
        unfold R . unfold abgrdiffrelint . simpl .
        apply ( @hinhuniv _  (make_hProp ( neg ( ishinh_UU _ ) ) ( isapropneg _ ) ) ) .
-       intro t2 . simpl . unfold neg .  apply ( @hinhuniv _ ( make_hProp _ isapropempty ) ) .
+       intro t2 . simpl . unfold neg .  use ( @hinhuniv _ hfalse ).
        intro t2' .
        set ( x1 := pr1 x ) . set ( a1 := pr2 x ) . set ( x2 := pr1 x' ) .
        set ( a2 := pr2 x' ) . set ( c1 := pr1 t2 ) . assert ( r1 := pr2 t2 ) .
@@ -1366,9 +1359,9 @@ Definition hz_normal_form (i:ℤ) :=
   coprod (∑ n, natnattohz n 0 = i)
          (∑ n, natnattohz 0 (S n) = i).
 
-Definition hznf_pos n := _,, inl (n,,idpath _) : total2 hz_normal_form.
+Definition hznf_pos n := (natnattohz n 0) ,, inl (n,,idpath _) : total2 hz_normal_form.
 
-Definition hznf_neg n := _,, inr (n,,idpath _) : total2 hz_normal_form.
+Definition hznf_neg n := (natnattohz 0 (S n)) ,, inr (n,,idpath _) : total2 hz_normal_form.
 
 Definition hznf_zero := hznf_pos 0.
 

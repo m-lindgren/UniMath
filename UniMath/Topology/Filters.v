@@ -1075,7 +1075,7 @@ Proof.
     split.
     + intros. assumption.
     + intros x Hx.
-      apply (Hx (O,,paths_refl _)).
+      apply (Hx (O ,, idpath _)).
   - intros F Hf A.
     apply hinhuniv.
     intros Ha.
@@ -1103,7 +1103,7 @@ Proof.
     split.
     + intros; assumption.
     + intros x Hx.
-      apply (Hx (O,,paths_refl _)).
+      apply (Hx (O,,idpath _)).
   - intros F Hf A.
     apply hinhuniv.
     intros Ha.
@@ -1210,7 +1210,7 @@ Proof.
            apply hinhpr.
            now left.
         ** intros x Hx.
-           apply (Hx (O ,, paths_refl _)).
+           apply (Hx (O ,, idpath _)).
       * apply hinhpr.
         exists (singletonSequence A).
         split.
@@ -1218,7 +1218,7 @@ Proof.
            apply hinhpr.
            now right.
         ** intros x Hx.
-           apply (Hx (O ,, paths_refl _)).
+           apply (Hx (O ,, idpath _)).
 Qed.
 
 (** *** Filter defined by a base *)

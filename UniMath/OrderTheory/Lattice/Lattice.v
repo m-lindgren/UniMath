@@ -1095,7 +1095,7 @@ Local Lemma iscomm_abmonoidfrac_def :
                       (abmonoidfrac_lattice_def f Hf)).
 Proof.
   intros f Hf Hcomm.
-  simple refine (setquotuniv2prop _ (λ x y, (_ x y = _ y x) ,, _) _).
+  simple refine (setquotuniv2prop _ (λ x y, (make_hProp (_ x y = _ y x) _)) _).
   - apply (pr2 (pr1 (pr1 (abmonoidfrac X Y)))).
   - intros x y.
     simpl.
@@ -1112,7 +1112,7 @@ Local Lemma isassoc_abmonoidfrac_def :
                       (abmonoidfrac_lattice_def f Hf)).
 Proof.
   intros f Hf Hassoc.
-  simple refine (setquotuniv3prop _ (λ x y z, (_ (_ x y) z = _ x (_ y z)) ,, _) _).
+  simple refine (setquotuniv3prop _ (λ x y z, make_hProp (_ (_ x y) z = _ x (_ y z)) _) _).
   - apply (pr2 (pr1 (pr1 (abmonoidfrac X Y)))).
   - intros x y z ; simpl.
     rewrite !(setquotfun2comm (eqrelabmonoidfrac X Y)).
@@ -1139,7 +1139,7 @@ Local Lemma isabsorb_abmonoidfrac_def :
                         (abmonoidfrac_lattice_def g Hg)).
 Proof.
   intros f g Hf Hg Habsorb.
-  simple refine (setquotuniv2prop _ (λ x y, (_ x (_ x y) = x) ,, _) _).
+  simple refine (setquotuniv2prop _ (λ x y, make_hProp (_ x (_ x y) = x) _) _).
   - apply (setproperty (abmonoidfrac X Y)).
   - intros x y.
     simpl.
@@ -1369,7 +1369,7 @@ Lemma abmonoidfrac_lenotgt :
   Lle (abmonoidfrac_lattice X Y lat Hmin Hmax) x y
   → ¬ (StrongOrder_abmonoidfrac Y gt Hgt) x y.
 Proof.
-  simple refine (setquotuniv2prop (eqrelabmonoidfrac X Y) (λ _ _, _ ,, _) _).
+  simple refine (setquotuniv2prop (eqrelabmonoidfrac X Y) (λ _ _, make_hProp _ _) _).
   + apply isapropimpl, isapropimpl, isapropempty.
   + intros x y H.
     apply (pr2 (abmonoidfrac_Lle _ _ _ _ _ _ _)) in H.
@@ -1379,7 +1379,7 @@ Proof.
     revert H.
     unfold abmonoidfracrel, quotrel.
     do 2 rewrite setquotuniv2comm.
-    apply (hinhuniv2 (P := make_hProp _ isapropempty)).
+    apply (hinhuniv2 (P := hfalse)).
     intros c c'.
     refine (Hlenotgt _ _ _ _).
     2: apply (pr2 c').

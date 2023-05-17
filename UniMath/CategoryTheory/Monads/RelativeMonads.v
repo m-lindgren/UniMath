@@ -957,6 +957,11 @@ Defined.
 
 
 (* former more destructive proof: *)
+(* TODO : Enable Universe Checking. Low priority.
+          This proof was disabled when -type-in-type was removed, and it
+          is currently unused. Since it's named [_obsolete] I didn't put
+          any effort into fixing it. Difficulty level unknown.
+ *)
 
 Definition relmonad_eq_from_relmonad_z_iso_obsolete {C : precategory_data} {D : category}
            (H: is_univalent D) (J : functor C D) {R R': RelMonad J}
@@ -974,12 +979,10 @@ Proof.
   cbn in η_eq, bind_eq.
   apply RelMonad_eq.
   + exact D.
-  + simpl.
-    apply maponpaths.
-    apply pathsdirprod; assumption.
-Defined.
-
-
+  (* + simpl. *)
+  (*   apply maponpaths. *)
+  (*   apply pathsdirprod; assumption. *)
+Abort.
 
 Lemma relmonad_eq_from_relmonad_z_iso_idtoiso {C : precategory_data} {D : category}
            (H: is_univalent D) (J : functor C D) {R R': RelMonad J} (p: R = R') :

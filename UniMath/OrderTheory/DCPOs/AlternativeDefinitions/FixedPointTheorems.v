@@ -120,14 +120,15 @@ Defined.
 (* TODO: consider naming *)
 Definition hdisj_monot' {p q p' q'} : (p ∨ q) ⇒ (p ⇒ p') ⇒ (q ⇒ q') ⇒ (p' ∨ q').
 Proof.
-  intros ? ? ?. eapply hdisj_monot; eassumption.
+  intros x f g.
+  exact(hdisj_monot f g x).
 Defined.
 
 (** This order of arguments is often more convenient to use than the original [hconjtohdisj] *)
 (* TODO: consider naming *)
 Definition hconjtohdisj' {p q r} : (p ∨ q) ⇒ (p ⇒ r) ⇒ (q ⇒ r) ⇒ r.
 Proof.
-  intros ? ? ?. apply (hconjtohdisj p q r); try split; assumption.
+  intros ? ? ?. use (hconjtohdisj p q r); try split; assumption.
 Defined.
 
 (* TODO: look for naming convention for similar lemmas *)
@@ -152,7 +153,8 @@ Definition istrans_subtype_containment {X} {A B C : hsubtype X}
     (leq_AB : A ⊆ B) (leq_BC : B ⊆ C)
   : A ⊆ C.
 Proof.
-  cbn in *; auto.
+  intros x a.
+  exact(leq_BC x (leq_AB x a)).
 Defined.
 
 (* A restricted-quantifier version of [neghexisttoforallneg] *)
@@ -196,8 +198,10 @@ Definition hconj_equiv {X:UU}
     {A A' B B' : hsubtype X} (e_A : A ≡ A') (e_B : B ≡ B')
   : (A ∩ B) ≡ (A' ∩ B').
 Proof.
-  intros x; split; intros [? ?]; split;
-    try apply e_A; try apply e_B; assumption.
+  simpl in e_A, e_B.
+  intros x; split; intros [? ?]; split
+  ; (try (apply(e_A x); assumption));
+    (try (apply(e_B x); assumption)).
 Defined.
 
 Definition subtype_binaryintersection_univ {X} (A B C : hsubtype X)
@@ -207,7 +211,11 @@ Proof.
   - intros C_AB. split; apply (istrans_subtype_containment C_AB).
     + apply subtype_binaryintersection_leq1.
     + apply subtype_binaryintersection_leq2.
-  - cbn. intros [? ?]; split; auto.
+  - intros [ca cb].
+    intros x cx.
+    split.
+    + exact(ca x cx).
+    + exact(cb x cx).
 Defined.
 
 (* *** Images of functions, as hsubtypes *)
@@ -253,8 +261,10 @@ Definition image_carrier_univ
 Proof.
   split.
   - intros H [y im_y]. eapply image_univ'; eassumption.
-  - intros H; cbn. apply image_univ'.
-    intros y im_y. exact (H (y,,im_y)).
+  - intros H; cbn; unfold resize_prop.
+    apply image_univ'.
+    intros y im_y.
+    exact(H (y ,, im_y)).
 Defined.
 
 (** Like [image_univ'], alias using explicit “forall” instead of “∀”, for easier use with the [apply] tactic. *)
@@ -298,8 +308,10 @@ Section LowerBounds.
     : (A ≡ B)
     -> islowerbound_subtype A ≡ islowerbound_subtype B.
   Proof.
-    intros e_A_B x; split;
-      intros x_lb [y H_y]; refine (x_lb (_,,_)); apply e_A_B; assumption.
+    intros e_A_B x; simpl in e_A_B; split; cbn;
+      intros x_lb [y H_y];
+      refine(x_lb (_ ,, _));
+      apply(e_A_B y); assumption.
   Defined.
 
   (* NOTE: For an alternative approach to [is_lower_bound_subfamily] and [image_same_lower_bounds], see analogues for upper bounds below. *)
@@ -342,7 +354,7 @@ Section UpperBounds.
     : (A ≡ B)
     -> isupperbound_subtype A ≡ isupperbound_subtype B.
   Proof.
-    intros e_A_B x; split;
+    intros e_A_B x; simpl in e_A_B; unfold resize_prop in e_A_B; split;
       intros x_ub [y H_y]; refine (x_ub (_,,_)); apply e_A_B; assumption.
   Defined.
 
@@ -612,7 +624,7 @@ Section Chains.
     : is_chain p -> is_chain (f ∘ p).
   Proof.
     intros p_chain x y.
-    apply (hdisj_monot' (p_chain x y));
+    use (hdisj_monot' (p_chain x y));
     intro; apply posetmorphism_property; assumption.
   Defined.
 
@@ -1099,7 +1111,7 @@ Proof.
     - assumption.
     - intros y [le_yx C_y]. split. 2: { use C_f_closed; assumption. }
       eapply istrans_posetRelation. { apply posetmorphism_property, le_yx. }
-      apply isrefl'_posetRelation, x_fix.
+      use isrefl'_posetRelation. apply x_fix.
     - intros A IH_A. split.
       2: { use C_sup_closed.
            apply (istrans_subtype_containment IH_A),
@@ -1117,7 +1129,7 @@ Proof.
     + use postfix_C. apply C_sup_C.
   - refine (least_upper_bound_is_upper_bound sup_C (_,,_)); assumption.
   - intros [x [x_fix leq_x0_x]]; simpl.
-    apply least_upper_bound_subtype_univ, C_below_allfix; assumption.
+    apply least_upper_bound_subtype_univ. use C_below_allfix; assumption.
 Defined.
 
 Theorem Tarski_fixpoint_theorem
@@ -1132,7 +1144,7 @@ Proof.
     apply least_upper_bound_subtype_univ.
     intros y [y_fix A_y].
     apply (istrans_posetRelation _ _ (f y)).
-    { apply isrefl'_posetRelation, pathsinv0; assumption. }
+    { use isrefl'_posetRelation. apply pathsinv0; assumption. }
     apply posetmorphism_property, least_upper_bound_subtype_is_upper_bound.
     use tpair; assumption.
   }
@@ -1216,7 +1228,7 @@ Proof.
                                      ⇒ ∀ y, C y ⇒ (y ≤ x) ∨ (f x ≤ y)).
   { intros x C_x x_bottleneck. use C_induction.
     - intros y [y_comp C_y]. split. 2: { use C_f_closed; assumption. }
-      apply (hconjtohdisj' y_comp).
+      use (hconjtohdisj' y_comp).
       2: { intros leq_fx_y. apply hdisj_in2.
            eapply istrans_posetRelation; try eassumption.
            use progressive_property. }
@@ -1233,7 +1245,7 @@ Proof.
         use least_upper_bound_subtype_is_upper_bound; assumption.
       + apply hdisj_in1.
         apply least_upper_bound_univ. intros [y C'_y].
-        eapply hdisjtoimpl. apply hdisj_comm, IH_C'.
+        eapply hdisjtoimpl. use hdisj_comm. apply IH_C'.
         intros leq_fx_y. apply C'_notpasses_fx.
         apply hinhpr; exists y. split; assumption.
   }
@@ -1264,14 +1276,22 @@ Proof.
       use (hconjtohdisj' (bottleneck_comparison y _ _ x _)); try assumption.
       2: { intro. eapply istrans_posetRelation; try eassumption.
            use progressive_property. }
-      intro le_x_y. apply isrefl'_posetRelation, pathsinv0.
-      refine (hdisjtoimpl (y_bottleneck x C_x _) _); try assumption.
-        use (negexists_to_forallneg_restricted C'_notpasses_fx); assumption.
+      intro le_x_y. use isrefl'_posetRelation. apply pathsinv0.
+      use(factor_through_squash (Q:=(x=y)) _ _ (y_bottleneck x C_x le_x_y)).
+      + apply setproperty.
+      + apply coprod_rect_nodep.
+        * intro t.
+          apply fromempty, C'_notpasses_fx, hinhpr.
+          exists y.
+          exists C'_y.
+          assumption.
+        * intro; assumption.
   }
   intros [x Cx] [y Cy]; simpl pr1carrier.
   assert (comparison : x ≤ y ∨ f y ≤ x).
-  { use bottleneck_comparison; try apply all_C_bottleneck; assumption. }
-  apply (hdisj_monot' comparison). { intro; assumption. }
+  { use bottleneck_comparison. exact Cy.
+    use all_C_bottleneck. exact Cy. exact Cx. }
+  use (hdisj_monot' comparison). { intro; assumption. }
   intro. eapply istrans_posetRelation; try eassumption.
   use progressive_property.
 Defined.

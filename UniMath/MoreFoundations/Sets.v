@@ -14,7 +14,7 @@ Require Export UniMath.Foundations.Sets.
 
 Local Open Scope logic.
 
-Definition hProp_set : hSet := make_hSet _ isasethProp.
+Notation hProp_set := hPropset.
 
 Definition isconst {X:UU} {Y:hSet} (f : X -> Y) : hProp := ∀ x x', f x = f x'.
 

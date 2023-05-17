@@ -563,7 +563,7 @@ Section Gauss.
     rewrite add_row_mult_nontarget_row.
     2: {apply natgthtoneq. apply (natlehlthtrans _ _ _  i_leh_k gt).  }
     now rewrite IH.
-  Defined.
+  Qed.
 
   (** Proving [mat r] is unchanged after column clearance if [r > sep]. *)
   Lemma gauss_clear_column_inv0
@@ -588,7 +588,7 @@ Section Gauss.
     rewrite add_row_mult_nontarget_row. 2: {now apply natlthtoneq. }
     rewrite IH. { apply idpath. }
     apply natgthtogeh, r_gt_sep.
-  Defined.
+  Qed.
 
   Lemma clear_column_eq_matrix_def { m n : nat } (iter : ⟦ S m ⟧%stn)
     (k_i : (⟦ m ⟧%stn)) (k_j : (⟦ n ⟧%stn)) (mat : Matrix F m n)
@@ -640,7 +640,7 @@ Section Gauss.
       change (istransnatlth _ _ _ _ p) with (make_stn _ iter lt').
       rewrite H; try easy.
       apply isreflnatleh.
-  Defined.
+  Qed.
 
   Lemma clear_column_matrix_invertible
     { m n : nat }
@@ -860,7 +860,7 @@ Section Gauss.
     rewrite <- (@ringlmultminus F), ringassoc2.
     etrans. { now apply maponpaths, maponpaths, fldmultinvlax'. }
     rewrite (@rigrunax2 F); apply ringrinvax1.
-  Defined.
+  Qed.
 
   Lemma gauss_clear_column_step_inv2
     {m n : nat}
@@ -879,7 +879,7 @@ Section Gauss.
     apply funextfun; intros ?.
     rewrite add_row_mult_nontarget_row; try reflexivity.
     now apply issymm_natneq.
-  Defined.
+  Qed.
 
   Lemma gauss_clear_column_step_inv3
     {m n : nat} (k_i : stn m)
@@ -890,7 +890,7 @@ Section Gauss.
   Proof.
     assert (p': r ≠ j). {now apply issymm_natneq, natgthtoneq. }
     now rewrite (gauss_clear_column_step_inv2 k_i k_j r mat j  p').
-  Defined.
+  Qed.
 
   (** if the target row r ≤ the pivot row k,
      mat r is not changed by the clearing procedure. *)
@@ -911,7 +911,7 @@ Section Gauss.
     2 : {now refine (natgthgehtrans _ _ _ gt _). }
     unfold gauss_clear_column in IH.
     now rewrite IH.
-  Defined.
+  Qed.
 
   (** Given a target row and pivot, proving the column clearing procedure equals applying step on it *)
   Lemma gauss_clear_column_inv2
@@ -990,7 +990,7 @@ Section Gauss.
       { rewrite contr_eq in k_le_r; contradiction (isirreflnatgth _ k_le_r). }
       unfold gauss_clear_column in interchange, p1 |-; rewrite interchange.
       rewrite p1; rewrite (stn_eq_2 _ _ eq p); now try apply isreflnatleh.
-  Defined.
+  Qed.
 
   Lemma gauss_clear_column_inv3
     { m n : nat } (k_i : (⟦ m ⟧%stn))
@@ -1007,7 +1007,7 @@ Section Gauss.
     2: {exact r_gt_k. }
     rewrite (gauss_clear_column_step_inv1 k_i k_j r mat); try easy.
     now apply natgthtoneq.
-  Defined.
+  Qed.
 
   (** 0 in pivot row -> corresponding col is unchanged after gcc *)
   Lemma gauss_clear_column_inv4
@@ -1042,7 +1042,7 @@ Section Gauss.
         do 3 rewrite IH.
         now rewrite eq0, <- eq, (@rigmultx0 F), (@rigrunax1 F).
       + now rewrite coprod_rect_compute_2.
-  Defined.
+  Qed.
 
   (** Notion of being row echelon "up to" a separator,
       and fulfilling criteria 1 and 2 from the preamble separately. *)
@@ -1154,8 +1154,12 @@ Section Gauss.
         destruct (stn_eq_or_neq _ _) as [? | ?];
           destruct (stn_eq_or_neq _ _) as [? | contr_neq]; simpl in is_le;
           try apply is_le;
-          simpl in contr_neq; rewrite <- eq in contr_neq;
-          contradiction (isirrefl_natneq _ contr_neq). }
+          simpl in contr_neq;
+          (unfold NegativePropositions.negProp_to_type in contr_neq;
+           cbn in contr_neq;
+           rewrite <- eq in contr_neq;
+           contradiction (isirrefl_natneq _ contr_neq)).
+      }
       unfold is_leading_entry in is_le'.
       rewrite (pr2 (is_le')); try reflexivity.
       refine (natlthlehtrans _ _ _ gt j1_lt_j2).

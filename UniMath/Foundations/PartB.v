@@ -42,7 +42,7 @@ Require Export UniMath.Foundations.PartA.
 (** *** h-levels of types *)
 
 
-Fixpoint isofhlevel (n : nat) (X : UU) : UU
+Fixpoint isofhlevel (n : nat) (X : Type) : Type
   := match n with
      | O => iscontr X
      | S m => ∏ x : X, ∏ x' : X, (isofhlevel m (x = x'))
@@ -499,14 +499,14 @@ Definition isapropunit : isaprop unit := iscontrpathsinunit.
 Definition isapropdirprod (X Y : UU) : isaprop X -> isaprop Y -> isaprop (X × Y)
   := isofhleveldirprod 1 X Y.
 
-Lemma isapropifcontr {X : UU} (is : iscontr X) : isaprop X.
+Lemma isapropifcontr {X : Type} (is : iscontr X) : isaprop X.
 Proof.
-  intros. set (f := λ x : X, tt).
-  assert (isw : isweq f)
-    by (apply isweqcontrtounit; assumption).
-  apply (isofhlevelweqb (S O) (make_weq f isw)).
-  intros x x'.
-  apply iscontrpathsinunit.
+  intros x y.
+  use make_iscontr.
+  - apply proofirrelevancecontr; assumption.
+  - intros t; induction t.
+    apply pathsinv0.
+    apply pathsinv0r.
 Defined.
 
 Theorem hlevelntosn (n : nat) (T : UU) (is : isofhlevel n T) : isofhlevel (S n) T.
@@ -863,7 +863,7 @@ Defined.
 
 (** *** Basics about types of h-level 2 - "sets" *)
 
-Definition isaset (X : UU) : UU := ∏ x x' : X, isaprop (x = x').
+Definition isaset (X : Type) : Type := ∏ x x' : X, isaprop (x = x').
 
 (* Definition isaset := isofhlevel 2. *)
 
@@ -1148,7 +1148,9 @@ Defined.
 
 Definition booleq {X : UU} (is : isdeceq X) (x x' : X) : bool.
 Proof.
-  intros. induction (is x x'). apply true. apply false.
+  induction(is x x').
+  - exact true.
+  - exact false.
 Defined.
 
 Lemma eqfromdnegeq (X : UU) (is : isdeceq X) (x x' : X) :

@@ -63,25 +63,46 @@ preferred choice in this situation.
 
 Require Export UniMath.Foundations.PartD.
 
-(** Universe structure *)
+(*
+   RR1 as formulated by VV in 2011_Bergen.pdf could be implemented as
 
-(* Definition UU0 := UU. *)
+       Definition resize_prop (A : Type@{k}) (_ : isaprop A) : Type@{Set} := A.
 
-(* end of " Preamble ". *)
+   What proved to be more useful (but should be equivalent) is to allow resizing
+   to any lower universe, not only the first one, which we implement in
+   resize_prop below.
 
+   RR1':
+      (U1 U2 : Univ) (U1 ≤ U2) (X : U2) (p : isaprop X) ⊢ X : U1
 
-(** ** To upstream files *)
+ *)
 
+#[bypass_check(universes)]
+Definition resize_prop@{i k | i <= k} (A : Type@{k}) (_ : isaprop A) : Type@{i}
+  := A.
 
+Global Strategy expand [ resize_prop ].
 
 (** ** The type [hProp] of types of h-level 1 *)
+(*
+  Different versions of hProp have been tried. Notable examples include variants
+  of:
+            Definition hProp : Type := ∑ (A : Set), isaprop A.
+  Different versions (such as monomorphic) of this worked quite well with RR1,
+  but more material compiled and were easier to fix with  RR1' and the definition
+  below. More of the existing code base compiled with this.
+ *)
 
+(* hProp : Type@{l} := ∑ (A : Type@{k}), isaprop A. *)
 
-Definition hProp := total2 (λ X : UU, isaprop X).
-Definition make_hProp (X : UU) (is : isaprop X) : hProp
-  := tpair (λ X : UU, isaprop X) X is.
-Definition hProptoType := @pr1 _ _ : hProp -> UU.
-Coercion hProptoType : hProp >-> UU.
+Definition hProp@{k l | k < l} : Type@{l}
+  := @total2@{l k l} Type@{k} isaprop.
+
+Definition make_hProp@{j k l | j < k, j < l} (X : Type@{k}) (is : isaprop X) : hProp@{j l}
+  := (resize_prop@{j k} X is ,, is).
+
+Definition hProptoType := pr1 : hProp -> Type.
+Coercion hProptoType : hProp >-> Sortclass.
 
 Definition propproperty (P : hProp) := pr2 P : isaprop (pr1 P).
 
@@ -118,13 +139,8 @@ Proof.
   - intro x. apply propproperty.
 Defined.
 
-Lemma isaprop_forall_hProp (X : UU) (Y : X -> hProp) : isaprop (∏ x, Y x).
-Proof.
-  intros. apply impred_isaprop. intro x. apply propproperty.
-Defined.
-
 Definition forall_hProp {X : UU} (Y : X -> hProp) : hProp
-  := make_hProp (∏ x, Y x) (isaprop_forall_hProp X Y).
+  := make_hProp (∏ x, Y x) (impred_prop Y).
 
 Notation "∀  x .. y , P"
   := (forall_hProp (λ x, .. (forall_hProp (λ y, P))..))
@@ -165,18 +181,17 @@ Definition isdecEq (X : UU) : hProp := make_hProp _ (isapropisdeceq X).
 
 (** *** The [hProp] version of the "inhabited" construction. *)
 
-
-
-Definition ishinh_UU (X : UU) : UU := ∏ P : hProp, ((X -> P) -> P).
+Definition ishinh_UU (X : Type) : Type
+  := ∏ (P : hProp), ((X -> P) -> P).
 
 Lemma isapropishinh (X : UU) : isaprop (ishinh_UU X).
 Proof.
-  apply impred.
-  intro P. apply impred.
-  intro. apply (pr2 P).
+  apply impred; intro.
+  apply impred_prop.
 Qed.
 
-Definition ishinh (X : UU) : hProp := make_hProp (ishinh_UU X) (isapropishinh X).
+Definition ishinh (X : Type) : hProp
+  := make_hProp (ishinh_UU X) (isapropishinh X).
 
 Notation nonempty := ishinh (only parsing).
 
@@ -199,12 +214,13 @@ Definition hinhuniv {X : UU} {P : hProp} (f : X -> P) (wit : ∥ X ∥) : P
 
 Corollary factor_through_squash {X Q : UU} : isaprop Q -> (X -> Q) -> ∥ X ∥ -> Q.
 Proof.
-  intros i f h. exact (@hinhuniv X (Q,,i) f h).
+  intros i f h.
+  exact(@hinhuniv X (make_hProp Q i) f h).
 Defined.
 
 Corollary squash_to_prop {X Q : UU} : ∥ X ∥ -> isaprop Q -> (X -> Q) -> Q.
 Proof.
-  intros h i f. exact (@hinhuniv X (Q,,i) f h).
+  intros h i f. exact (@hinhuniv X (make_hProp Q i) f h).
 Defined.
 
 Definition hinhand {X Y : UU} (inx1 : ∥ X ∥) (iny1 : ∥ Y ∥) : ∥ X × Y ∥
@@ -288,8 +304,8 @@ Definition image {X Y : UU} (f : X -> Y) : UU
 Definition make_image {X Y : UU} (f : X -> Y) :
   ∏ (t : Y), (λ y : Y, ∥ hfiber f y ∥) t → ∑ y : Y, ∥ hfiber f y ∥
   := tpair (λ y : Y, ishinh (hfiber f y)).
-Definition pr1image {X Y : UU} (f : X -> Y) :
-  (∑ y : Y, ∥ hfiber f y ∥) → Y
+
+Definition pr1image {X Y : UU} (f : X -> Y) : image f -> Y
   := @pr1 _  (λ y : Y, ishinh (hfiber f y)).
 
 Definition prtoimage {X Y : UU} (f : X -> Y) : X -> image f.
@@ -373,13 +389,11 @@ Defined.
 
 (** *** Intuitionistic logic on [hProp]. *)
 
-
 Definition htrue : hProp := make_hProp unit isapropunit.
-
 Definition hfalse : hProp := make_hProp empty isapropempty.
 
 Definition hconj (P Q : hProp) : hProp
-  := make_hProp (P × Q) (isapropdirprod _ _ (pr2 P) (pr2 Q)).
+  := make_hProp (P × Q) (isapropdirprod P Q (propproperty P) (propproperty Q)).
 
 Notation "A ∧ B" := (hconj A B) (at level 80, right associativity) : type_scope.
   (* precedence same as /\ *)
@@ -404,10 +418,11 @@ Defined.
 Lemma disjoint_disjunction (P Q : hProp) : (P -> Q -> ∅) -> hProp.
 Proof.
   intros n.
-  exact (P ⨿ Q,, isapropcoprod P Q (propproperty P) (propproperty Q) n).
+  exact (make_hProp (P ⨿ Q) (isapropcoprod P Q (propproperty P) (propproperty Q) n)).
 Defined.
 
-Definition hneg (P : UU) : hProp := make_hProp (¬ P) (isapropneg P).
+Definition hneg (P : UU) : hProp
+  := make_hProp (¬ P) (isapropneg P).
 (* uses funextemptyAxiom *)
 
 (* use scope "logic" for notations that might conflict with others *)
@@ -416,17 +431,16 @@ Declare Scope logic.
 Notation "'¬' X" := (hneg X) (at level 35, right associativity) : logic.
   (* type this in emacs in agda-input method with \neg *)
 Delimit Scope logic with logic.
-
-Definition himpl (P : UU) (Q : hProp) : hProp.
-Proof.
-  intros. split with (P -> Q). apply impred. intro. apply (pr2 Q).
-Defined.
-
+Set Printing Universes.
+Definition himpl (P : UU) (Q : hProp) : hProp
+  := make_hProp (P -> Q)
+                (impred_prop (λ _ : P, Q)).
 Local Notation "A ⇒ B" := (himpl A B) : logic.
   (* precedence same as <-> *)
   (* in agda-input method, type \r= or \Rightarrow or \=> *)
   (* can't make it global, because it's defined differently in
      CategoryTheory/UnicodeNotations.v *)
+
 Local Open Scope logic.
 
 Definition hexists {X : UU} (P : X -> UU) := ∥ total2 P ∥.
@@ -481,12 +495,12 @@ Proof.
     {
       intro X2.
       induction X2 as [ XP | XQ ].
-      - apply X0. apply XP.
-      - apply (pr2 X0). apply XQ.
+      - exact(pr1 X0 XP).
+      - exact(pr2 X0 XQ).
     }
     apply (hinhuniv s2). apply X1.
   }
-  unfold himpl. simpl. apply s1.
+  exact s1.
 Defined.
 
 (** *** Negation and quantification.
@@ -527,10 +541,10 @@ Definition weqforallnegtonegexists {X : UU} (F : X -> UU) :
 Proof.
   intros.
   apply (weqimplimpl (forallnegtoneghexists F) (neghexisttoforallneg F)).
-  apply impred. intro x. apply isapropneg. apply isapropneg.
+  apply impred; intro.
+  use isapropneg.
+  use isapropneg.
 Defined.
-
-
 
 (** *** Negation and conjunction ("and") and disjunction ("or").
 
@@ -544,7 +558,7 @@ names [fromneganddecx] and [fromneganddecy]. *)
 Lemma tonegdirprod {X Y : UU} : ¬ X ∨ ¬ Y -> ¬ (X × Y).
 Proof.
   simpl.
-  apply (@hinhuniv _ (make_hProp _ (isapropneg (X × Y)))).
+  apply (@hinhuniv _ (hneg (X × Y))).
   intro c. induction c as [ nx | ny ].
   - simpl. intro xy. apply (nx (pr1 xy)).
   - simpl. intro xy. apply (ny (pr2 xy)).
@@ -601,13 +615,12 @@ Lemma hdisjtoimpl {P : UU} {Q : hProp} : P ∨ Q -> ¬ P -> Q.
 Proof.
   assert (int : isaprop (¬ P -> Q)).
   {
-    apply impred. intro.
-    apply (pr2 Q).
+    apply impred_prop.
   }
-  simpl. apply (@hinhuniv _ (make_hProp _ int)).
-  simpl. intro pq. induction pq as [ p | q ].
-  - intro np. induction (np p).
-  - intro np. apply q.
+  apply (@hinhuniv _ (make_hProp _ int)).
+  intro pq. induction pq as [ p | q ].
+  - intro np; exact(fromempty (np p)).
+  - intro np. exact q.
 Defined.
 
 
@@ -659,7 +672,7 @@ Theorem hPropUnivalence : ∏ (P Q : hProp), (P -> Q) -> (Q -> P) -> P = Q.
      "uahp" *)
 Proof.
   intros ? ? f g.
-  apply subtypePath.
+  use subtypePath.
   - intro X. apply isapropisaprop.
   - apply propositionalUnivalenceAxiom.
     + apply propproperty.
@@ -682,7 +695,6 @@ Proof.
   intros. apply proofirrelevance.
   apply (isapropweqtoprop P P' (pr2 P')).
 Defined.
-
 
 Theorem univfromtwoaxiomshProp (P P' : hProp) : isweq (@eqweqmaphProp P P').
 Proof.

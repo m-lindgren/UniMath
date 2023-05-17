@@ -485,7 +485,7 @@ Definition root (X : preZFS) : Ve X := pr1 (pr2 (pr2 (pr1 (pr1 X)))).
 
 Lemma preZFS_isrigid (X : preZFS) : iscontr (X = X).
 Proof.
-  apply (pr1contr_to_contr _ (λ x, (ispreZFS x ,, isaprop_ispreZFS x)) X).
+  apply (pr1contr_to_contr _ (λ x, (make_hProp (ispreZFS x) (isaprop_ispreZFS x))) X).
   exact (pr122 X).
 Qed.
 
@@ -506,7 +506,7 @@ Definition preZFS_iso (X Y : preZFS) : UU := Tree_iso (pr1 X) (pr1 Y).
 Theorem preZFS_univalence (X Y : preZFS) : (X = Y) ≃ (preZFS_iso X Y).
 Proof.
   set (P := λ x, λ y, Tree_univalence x y).
-  set (Q := λ x, (ispreZFS x ,, isaprop_ispreZFS x)).
+  set (Q := λ x, (make_hProp (ispreZFS x) (isaprop_ispreZFS x))).
   exact (substructure_univalence _ _ P Q X Y).
 Qed.
 
@@ -865,7 +865,7 @@ Definition ZFS_iso (x y : ZFS) := preZFS_iso x y.
 Theorem ZFS_univalence (x y : ZFS) : (x = y) ≃ (ZFS_iso x y).
 Proof.
   set (P := λ x, λ y, preZFS_univalence x y).
-  set (Q := λ x, (hasuniquerepbranch x ,, isaprop_hasuniquerepbranch x)).
+  set (Q := λ x, make_hProp (hasuniquerepbranch x) (isaprop_hasuniquerepbranch x)).
   apply (substructure_univalence _ _ P Q x y).
 Qed.
 
@@ -1022,7 +1022,7 @@ Proof.
   set (s := (pr2 Y w z r)).
   simpl in ρ.
   set (τ y := @isapropdirprod _ _ (isaprop_isapoint y) (isaset_ZFS X (Y ↑ y))).
-  set (P := λ y : Y, (isapoint y × X = Y ↑ y) ,, τ y).
+  set (P := λ y : Y, make_hProp (isapoint y × X = Y ↑ y) (τ y)).
   apply (total2_paths_hProp_equiv P (z,, (ispp,, p)) (w,, (ispq,, q))).
   simpl.
   apply (! s).

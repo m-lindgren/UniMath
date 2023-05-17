@@ -335,8 +335,8 @@ Lemma isarchabgrdiff {X : abmonoid} (R : hrel X)  (Hr : isbinophrel R) :
   isarchgr (X := abgrdiff X) (abgrdiffrel X (L := R) Hr).
 Proof.
   intros Hr' H.
-  simple refine (setquotuniv3prop _ (λ x y1 y2, (abgrdiffrel X Hr y1 y2 ->
-    ∃ n : nat, abgrdiffrel X Hr (natmult (X := abgrdiff X) n y1 * x)%multmonoid (natmult (X := abgrdiff X) n y2)) ,, _) _).
+  simple refine (setquotuniv3prop _ (λ x y1 y2, make_hProp (abgrdiffrel X Hr y1 y2 ->
+    ∃ n : nat, abgrdiffrel X Hr (natmult (X := abgrdiff X) n y1 * x)%multmonoid (natmult (X := abgrdiff X) n y2)) _) _).
   abstract apply isapropimpl, propproperty.
   intros x y1 y2 Hy.
   eapply hinhfun2.

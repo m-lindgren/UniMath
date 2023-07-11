@@ -315,7 +315,7 @@ Definition Tree_iso (T1 T2 : Tree) : UU := pr1 T1 ≅ pr1 T2.
 Theorem Tree_univalence (T1 T2 : Tree) : (T1 = T2) ≃ (Tree_iso T1 T2).
 Proof.
   set (P := λ G, λ H, TRRGraph_univalence G H).
-  set (Q := λ G, (isatree G ,, isaprop_isatree G)).
+  set (Q := λ G, make_hProp (isatree G) (isaprop_isatree G)).
   apply (substructure_univalence _ _ P Q T1 T2).
 Qed.
 
@@ -735,7 +735,7 @@ Qed.
 
 Lemma iscontrauto_Tree_TRRGraph (T : Tree) : isrigid T → iscontr ((pr1 T) = (pr1 T)).
 Proof.
-  apply (@contr_to_pr1contr _ (λ x, (isatree x ,, isaprop_isatree x)) T).
+  apply (@contr_to_pr1contr _ (λ x, make_hProp (isatree x) (isaprop_isatree x)) T).
 Qed.
 
 Definition Up_to_Up (T : Tree) (x : pr11 T) (y : pr11 (Up x)) :
@@ -829,10 +829,12 @@ Qed.
 Lemma preZFS_Branch_issuperrigid (T : preZFS) (x : T) : issuperrigid (preZFS_Branch T x).
  Proof.
   split.
-  - apply (pr1contr_to_contr _ (λ x, (isatree x ,, isaprop_isatree x)) (preZFS_Branch T x)).
+  - apply (pr1contr_to_contr _
+             (λ x, make_hProp (isatree x) (isaprop_isatree x)) (
+               preZFS_Branch T x)).
     apply (iscontrauto_Tree_TRRGraph (Up x) ((pr222 T) x)).
   - intros y.
-    apply (pr1contr_to_contr _ (λ x, (isatree x ,, isaprop_isatree x)) (Up y)).
+    apply (pr1contr_to_contr _ (λ x, make_hProp (isatree x) (isaprop_isatree x)) (Up y)).
     simpl.
     unfold preZFS_Branch.
     unfold preZFS_Branch in y.

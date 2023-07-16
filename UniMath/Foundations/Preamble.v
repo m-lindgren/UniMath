@@ -17,28 +17,33 @@ Require Export UniMath.Foundations.Init.
 Global Set Universe Polymorphism.
 Global Set Polymorphic Inductive Cumulativity.
 Global Unset Universe Minimization ToSet.
+Global Unset Cumulativity Weak Constraints.
+Global Set Private Polymorphic Universes.
+Global Set Printing Universes.
 Global Unset Strict Universe Declaration.
+
+
 Local Unset Elimination Schemes.
 
 Notation UU := Type (only parsing).
 Notation UU0 := Type@{Set} (only parsing).
 
 (** The empty type *)
-Inductive empty : Type := .
+Inductive empty : UU0 := .
 Notation "∅" := empty.
 Scheme Induction for empty Sort Type.
 Scheme Minimality for empty Sort Type.
 Definition empty_rec := empty_rect.
 
 (** The one-element type *)
-Inductive unit : Type :=
+Inductive unit : UU0 :=
   tt : unit.
 Scheme Induction for unit Sort Type.
 Scheme Minimality for unit Sort Type.
 Definition unit_rec := unit_rect.
 
 (** The two-element type *)
-Inductive bool : Type :=
+Inductive bool : UU0 :=
   | true : bool
   | false : bool.
 Scheme Induction for bool Sort Type.
@@ -196,7 +201,7 @@ in a proof term, just mentally replace it by
 Global Set Primitive Projections.
 Global Set Nonrecursive Elimination Schemes.
 
-Record total2 {T : Type@{i}} (P : T -> Type@{j}) : Type@{k}
+Cumulative Record total2 {T : Type@{i}} (P : T -> Type@{j}) : Type@{k}
   := tpair {
          pr1 : T;
          pr2 : P pr1

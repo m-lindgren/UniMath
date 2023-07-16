@@ -78,7 +78,7 @@ Require Export UniMath.Foundations.PartD.
  *)
 
 #[bypass_check(universes)]
-Definition resize_prop@{i k | i <= k} (A : Type@{k}) (_ : isaprop A) : Type@{i}
+Definition resize_prop@{i k | i < k} (A : Type@{k}) (_ : isaprop A) : Type@{i}
   := A.
 
 Global Strategy expand [ resize_prop ].
@@ -94,12 +94,14 @@ Global Strategy expand [ resize_prop ].
  *)
 
 (* hProp : Type@{l} := ∑ (A : Type@{k}), isaprop A. *)
+Unset Printing Notations.
 
 Definition hProp@{k l | k < l} : Type@{l}
   := @total2@{l k l} Type@{k} isaprop.
 
-Definition make_hProp@{j k l | j < k, j < l} (X : Type@{k}) (is : isaprop X) : hProp@{j l}
-  := (resize_prop@{j k} X is ,, is).
+(* This definition should allow us to create elements of hProps of arbitrary sizes. *)
+Definition make_hProp@{j k l | k <= l, j < l} (X : Type@{k}) (is : isaprop X) : hProp@{j l}
+  := (resize_prop@{j l} X is ,, is).
 
 Definition hProptoType := pr1 : hProp -> Type.
 Coercion hProptoType : hProp >-> Sortclass.

@@ -1354,7 +1354,7 @@ Proof.
         apply weqstnsum_invmap_step2.
 (* TODO : Enable Universe Checking. Change Admitted -> Defined.
           Currently this is very slow to type check. *)
-Admitted.
+Defined.
 
 Definition weqstnsum1 {n : nat} (f : ⟦n⟧ -> nat) : (∑ i, ⟦f i⟧) ≃ ⟦stnsum f⟧.
 Proof.

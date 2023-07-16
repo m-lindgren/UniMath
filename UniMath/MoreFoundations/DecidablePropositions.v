@@ -16,7 +16,8 @@ Proof.
   - now apply ii2, (negf YtoX).
 Defined.
 
-Definition decidable_prop (X:hProp) := make_hProp (decidable X) (isapropdec X (pr2 X)).
+Definition decidable_prop (X : hProp) : hProp
+  := make_hProp (decidable X) (isapropdec X (propproperty X)).
 
 Definition LEM : hProp := ∀ P : hProp, decidable_prop P.
 
@@ -187,16 +188,23 @@ Defined.
 (* all of this stuff about decidable propositions will be replaced by the better code above *)
 (*****************************************************************************)
 
-Definition DecidableProposition : UU := ∑ X : UU, isdecprop X.
+Definition DecidableProposition : UU := ∑ X : hProp, decidable X.
 
-Definition isdecprop_to_DecidableProposition {X : UU} (i : isdecprop X) :
-  DecidableProposition := X,,i.
+Definition DecidableProposition_to_hProp : DecidableProposition -> hProp
+  := pr1.
+Coercion DecidableProposition_to_hProp : DecidableProposition >-> hProp.
+
+Definition decidability_property (X : DecidableProposition)
+  : decidable X
+  := pr2 X.
+
+(* Definition isdecprop_to_DecidableProposition {X : UU} (i : isdecprop X) : *)
+(*   DecidableProposition := X,,i. *)
 
 Definition decidable_to_isdecprop {X : hProp} : decidable X -> isdecprop X.
 Proof.
-  intros dec. apply isdecpropif.
-  - apply propproperty.
-  - exact dec.
+  apply isdecpropif.
+  apply propproperty.
 Defined.
 
 Definition decidable_to_isdecprop_2 {X : UU} :
@@ -209,20 +217,21 @@ Defined.
 
 Definition decidable_to_DecidableProposition {X : hProp} :
   decidable X -> DecidableProposition.
-Proof. intros dec. exists X. now apply decidable_to_isdecprop. Defined.
+Proof.
+  intros dec.
+  exists X.
+  exact dec.
+Defined.
 
 Definition DecidableProposition_to_isdecprop (X : DecidableProposition) :
-  isdecprop (pr1 X).
-Proof. apply pr2. Defined.
-
-Definition DecidableProposition_to_hProp : DecidableProposition -> hProp.
+  isdecprop X.
 Proof.
-  intros X.
-  exact(make_hProp (pr1 X) (isdecproptoisaprop (pr1 X) (pr2 X))).
+  apply decidable_to_isdecprop.
+  apply decidability_property.
 Defined.
-Coercion DecidableProposition_to_hProp : DecidableProposition >-> hProp.
+
 Definition decidabilityProperty (X : DecidableProposition) :
-  isdecprop X := pr2 X.
+  isdecprop X := decidable_to_isdecprop (decidability_property X).
 
 Definition DecidableSubtype (X : UU) : UU := X -> DecidableProposition.
 Definition DecidableRelation (X : UU) : UU := X -> X -> DecidableProposition.
@@ -236,12 +245,14 @@ Defined.
 
 Definition decidableAnd (P Q : DecidableProposition) : DecidableProposition.
 Proof.
-  intros. exists (P × Q). apply isdecpropdirprod; apply decidabilityProperty.
+  exists (P ∧ Q).
+  apply decidable_dirprod;
+    apply decidability_property.
 Defined.
 
 Definition decidableOr (P Q : DecidableProposition) : DecidableProposition.
 Proof.
-  intros. exists (P ∨ Q). apply isdecprophdisj; apply decidabilityProperty.
+  exists (P ∨ Q). apply isdecprophdisj; apply decidabilityProperty.
 Defined.
 
 Lemma neg_isdecprop {X : UU} : isdecprop X -> isdecprop (¬ X).
@@ -259,7 +270,7 @@ Defined.
 
 Definition decidableNot (P : DecidableProposition) : DecidableProposition.
 Proof.
-  intros. exists (¬ P). apply neg_isdecprop; apply decidabilityProperty.
+  exists (¬ P)%logic. apply neg_isdecprop; apply decidabilityProperty.
 Defined.
 
 Declare Scope decidable_logic.
@@ -271,7 +282,7 @@ Notation "'¬' X" := (decidableNot X) (at level 35, right associativity) :
                       decidable_logic.
 Delimit Scope decidable_logic with declog.
 
-Ltac choose P yes no := induction (pr1 (decidabilityProperty P)) as [yes|no].
+Ltac choose P yes no := induction (decidability_property P) as [yes|no].
 
 Definition choice {W : UU} : DecidableProposition -> W -> W -> W.
 Proof.

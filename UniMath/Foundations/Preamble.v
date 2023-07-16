@@ -201,7 +201,7 @@ in a proof term, just mentally replace it by
 Global Set Primitive Projections.
 Global Set Nonrecursive Elimination Schemes.
 
-Cumulative Record total2 {T : Type@{i}} (P : T -> Type@{j}) : Type@{k}
+Record total2 {T : Type@{i}} (P : T -> Type@{j}) : Type@{k}
   := tpair {
          pr1 : T;
          pr2 : P pr1

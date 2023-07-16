@@ -398,8 +398,6 @@ Proof. intros. exact (inducedPartialOrder f (incl_injectivity  f (weqproperty f)
 
 Local Open Scope foset.
 
-(* TODO : Enable Universe Checking  *)
-#[bypass_check(universes)]
 Definition transportFiniteOrdering {n} {X:UU} : X ≃ ⟦ n ⟧ -> FiniteOrderedSet.
 (* The new finite ordered set has X as its underlying set. *)
 Proof.

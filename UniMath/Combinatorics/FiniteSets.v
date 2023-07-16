@@ -469,11 +469,11 @@ Definition isfinite_to_DecidableEquality {X : UU}
   : isfinite X -> DecidableRelation X.
 Proof.
   intros fin x y.
-  exact (@isdecprop_to_DecidableProposition
-           (x=y)
-           (isdecpropif (x=y)
-              (isfinite_isaset X fin x y)
-              (isfinite_isdeceq X fin x y))).
+  use decidable_to_DecidableProposition.
+  - use make_hProp.
+    + exact(x = y).
+    + exact(isfinite_isaset X fin x y).
+  - exact(isfinite_isdeceq X fin x y).
 Defined.
 
 Definition subsetFiniteness {X : UU} (is : isfinite X) (P : DecidableSubtype X)

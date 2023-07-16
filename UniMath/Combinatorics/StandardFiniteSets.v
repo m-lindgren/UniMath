@@ -156,15 +156,14 @@ Proof.
   use make_Poset.
   - exact(stnset n).
   - use make_PartialOrder.
-    + use(λ i j: ⟦n⟧, (i ≤ j))%dnat.
+    + exact(λ i j: ⟦n⟧, (i ≤ j))%dnat.
     + unfold isPartialOrder; split.
       * split.
         -- intros i j k; apply istransnatleh.
         -- intros i; apply isreflnatleh.
       * intros i j r s.
-        apply (invmaponpathsincl _ ( isinclstntonat _ )).
-        apply isantisymmnatleh;
-          assumption.
+        apply (invmaponpathsincl (stntonat n) (isinclstntonat n)).
+        exact(isantisymmnatleh (stntonat n i) (stntonat n j) r s).
 Defined.
 
 Definition lastelement {n : nat} : ⟦S n⟧.
@@ -598,7 +597,7 @@ Proof.
   - exact (ii2 tt).
   - apply ii1. induction i as [i I]. induction j as [j J].
     choose (i < j)%dnat a a.
-    + exists i. exact(natltltSlt i j n a J).
+    + exists i. use(natltltSlt i j n a J).
     + exists (i - 1).
       induction (natlehchoice _ _ (negnatgthtoleh a)) as [b|b].
       * induction (natlehchoice4 _ _ I) as [c|c].
@@ -1327,7 +1326,7 @@ Proof.
       * apply homotrefl.
     + clear I.
       generalize k; clear k.
-      use (homotweqinv
+      apply (homotweqinv
                 (λ c, invmap (weqoverdnicoprod (λ i, ⟦ f i ⟧))
                              (coprodf (weqstnsum_invmap (λ i, f (dni lastelement i)))
                                       (idweq (⟦ f lastelement ⟧))
@@ -1352,8 +1351,6 @@ Proof.
           with (weqfromcoprodofstn_map (stnsum (λ x : ⟦ n ⟧, f (dni lastelement x))) (f lastelement)).
         apply pathsinv0.
         apply weqstnsum_invmap_step2.
-(* TODO : Enable Universe Checking. Change Admitted -> Defined.
-          Currently this is very slow to type check. *)
 Defined.
 
 Definition weqstnsum1 {n : nat} (f : ⟦n⟧ -> nat) : (∑ i, ⟦f i⟧) ≃ ⟦stnsum f⟧.

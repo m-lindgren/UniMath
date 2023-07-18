@@ -18,15 +18,22 @@ Local Infix "::" := cons.
 
 Section BinaryOperations.
 
-  Context {X:UU} (unel:X) (op:binop X).
-
   (* we use an extra induction step in each of the following definitions so
      we don't end up with superfluous unel factors *)
 
-  Definition iterop_list : list X -> X :=
+  Definition iterop_list
+    {X : Type}
+    (unel : X)
+    (op : binop X)
+    : list X -> X :=
     foldr1 op unel.
 
-  Definition iterop_fun {n} (x:stn n->X) : X.
+  Definition iterop_fun
+    {X : Type}
+    (unel : X)
+    (op : binop X)
+    {n : nat}
+    (x:stn n->X) : X.
   Proof.
     intros.
     induction n as [|n _].
@@ -36,69 +43,83 @@ Section BinaryOperations.
       { exact (op (I (x ∘ dni lastelement)) (x lastelement)). }}
   Defined.
 
-  Definition iterop_seq : Sequence X -> X.
+  Definition iterop_seq {X : Type}
+    (unel : X)
+    (op : binop X)
+    : Sequence X -> X.
   Proof.
     intros x.
-    exact (iterop_fun x).
+    exact (iterop_fun unel op x).
   Defined.
 
   (* now define products of products *)
 
-  Definition iterop_list_list : list(list X) -> X.
+  Definition iterop_list_list {X : Type}
+    (unel : X)
+    (op : binop X)
+    : list(list X) -> X.
   Proof.
     intros w.
-    exact (iterop_list (map iterop_list w)).
+    exact (iterop_list unel op (map (iterop_list unel op) w)).
   Defined.
 
-  Definition iterop_fun_fun {n} {m:stn n -> nat} : (∏ i (j:stn (m i)), X) -> X.
+  Definition iterop_fun_fun {X : Type} (unel : X) (op : binop X)
+    {n} {m:stn n -> nat} : (∏ i (j:stn (m i)), X) -> X.
   Proof.
     intros x.
-    exact (iterop_fun (λ i, iterop_fun (x i))).
+    exact (iterop_fun unel op (λ i, iterop_fun unel op (x i))).
   Defined.
 
-  Definition iterop_seq_seq : Sequence (Sequence X) -> X.
+  Definition iterop_seq_seq {X : Type} (unel : X) (op : binop X)
+    : Sequence (Sequence X) -> X.
   Proof.
     intros x.
-    exact (iterop_fun_fun (λ i j, x i j)).
+    exact (iterop_fun_fun unel op (λ i j, x i j)).
   Defined.
 
-  Definition isAssociative_list := ∏ (x:list (list X)), iterop_list (Lists.flatten x) = iterop_list_list x.
+  Definition isAssociative_list {X : Type} (unel : X) (op : binop X)
+    := ∏ (x:list (list X)), iterop_list unel op (Lists.flatten x) = iterop_list_list unel op x.
 
-  Definition isAssociative_fun :=
-    ∏ n (m:stn n -> nat) (x : ∏ i (j:stn (m i)), X), iterop_fun (StandardFiniteSets.flatten' x) = iterop_fun_fun x.
+  Definition isAssociative_fun {X : Type} (unel : X) (op : binop X)
+    := ∏ n (m:stn n -> nat) (x : ∏ i (j:stn (m i)), X),
+      iterop_fun unel op (StandardFiniteSets.flatten' x) = iterop_fun_fun unel op x.
 
-  Definition isAssociative_seq :=
-    ∏ (x : Sequence (Sequence X)), iterop_seq (FiniteSequences.flatten x) = iterop_seq_seq x.
+  Definition isAssociative_seq {X : Type} (unel : X) (op : binop X)
+    :=  ∏ (x : Sequence (Sequence X)), iterop_seq unel op (FiniteSequences.flatten x) = iterop_seq_seq unel op x.
 
   Local Open Scope stn.
 
-  Definition isCommutative_fun :=
-    ∏ n (x:⟦n⟧ -> X) (f:⟦n⟧≃⟦n⟧), iterop_fun (x ∘ f) = iterop_fun x.
+  Definition isCommutative_fun {X : Type} (unel : X) (op : binop X) :=
+    ∏ n (x:⟦n⟧ -> X) (f:⟦n⟧≃⟦n⟧), iterop_fun unel op (x ∘ f) = iterop_fun unel op x.
 
-  Lemma assoc_fun_to_seq : isAssociative_fun -> isAssociative_seq.
+  Lemma assoc_fun_to_seq  {X : Type} (unel : X) (op : binop X)
+    : isAssociative_fun unel op -> isAssociative_seq unel op.
   Proof.
     intros assoc x.
     exact (assoc _ _ (λ i j, x i j)).
   Defined.
 
-  Lemma assoc_seq_to_fun : isAssociative_seq -> isAssociative_fun.
+  Lemma assoc_seq_to_fun {X : Type} (unel : X) (op : binop X)
+    : isAssociative_seq unel op -> isAssociative_fun unel op.
   Proof.
     intros assoc n m x.
     exact (assoc (functionToSequence (λ i, functionToSequence (x i)))).
   Defined.
 
-  Definition iterop_list_step (runax : isrunit op unel) (x:X) (xs:list X) :
-    iterop_list (x::xs) = op x (iterop_list xs).
+  Definition iterop_list_step {X : Type} (unel : X) (op : binop X)
+    (runax : isrunit op unel) (x:X) (xs:list X) :
+    iterop_list unel op (x::xs) = op x (iterop_list unel op xs).
   Proof.
     generalize x; clear x.
-    apply (list_ind (λ xs, ∏ x : X, iterop_list (x :: xs) = op x (iterop_list xs))).
+    apply (list_ind (λ xs, ∏ x : X, iterop_list unel op (x :: xs) = op x (iterop_list unel op xs))).
     { intro x. simpl. apply pathsinv0,runax. }
     intros y rest IH x.
     reflexivity.
   Defined.
 
-  Definition iterop_fun_step' (lunax : islunit op unel) {m} (xs:stn m -> X) (x:X) :
-    iterop_fun (append_vec xs x) = op (iterop_fun xs) x.
+  Definition iterop_fun_step' {X : Type} (unel : X) (op : binop X)
+    (lunax : islunit op unel) {m} (xs:stn m -> X) (x:X) :
+    iterop_fun unel op (append_vec xs x) = op (iterop_fun unel op xs) x.
   Proof.
     unfold iterop_fun at 1.
     simpl.
@@ -109,8 +130,9 @@ Section BinaryOperations.
       apply append_and_drop_fun.
   Defined.
 
-  Definition iterop_fun_step (lunax : islunit op unel) {m} (x:stn(S m) -> X) :
-    iterop_fun x = op (iterop_fun (x ∘ dni lastelement)) (x lastelement).
+  Definition iterop_fun_step {X : Type} (unel : X) (op : binop X)
+    (lunax : islunit op unel) {m} (x:stn(S m) -> X) :
+    iterop_fun unel op x = op (iterop_fun unel op (x ∘ dni lastelement)) (x lastelement).
   Proof.
     intros.
     unfold iterop_fun at 1.
@@ -120,12 +142,13 @@ Section BinaryOperations.
     - simpl. reflexivity.
   Defined.
 
-  Definition iterop_fun_append (lunax : islunit op unel) {m} (x:stn m -> X) (y:X) :
-    iterop_fun (append_vec x y) = op (iterop_fun x) y.
+  Definition iterop_fun_append {X : Type} (unel : X) (op : binop X)
+    (lunax : islunit op unel) {m} (x:stn m -> X) (y:X) :
+    iterop_fun unel op (append_vec x y) = op (iterop_fun unel op x) y.
   Proof.
-    rewrite (iterop_fun_step lunax).
+    rewrite (iterop_fun_step unel op lunax).
     rewrite append_vec_compute_2.
-    apply (maponpaths (λ x, op (iterop_fun x) y)).
+    apply (maponpaths (λ x, op (iterop_fun unel op x) y)).
     apply funextfun; intro i.
     simpl.
     rewrite append_vec_compute_1.
@@ -487,18 +510,21 @@ End NatCard.
 
 Definition MultipleOperation (X:UU) : UU := UnorderedSequence X -> X.
 
+(* TODO : Enable Universe Checking *)
+Local Unset Universe Checking.
 Section Mult.
 
-  Context {X:UU} (op : MultipleOperation X).
-
-  Definition composeMultipleOperation : UnorderedSequence (UnorderedSequence X) -> X.
+  Definition composeMultipleOperation {X:UU} (op : MultipleOperation X)
+    : UnorderedSequence (UnorderedSequence X) -> X.
   Proof.
     intros s. exact (op (composeUnorderedSequence op s)).
   Defined.
 
-  Definition isAssociativeMultipleOperation := ∏ x, op (flattenUnorderedSequence x) = composeMultipleOperation x.
+  Definition isAssociativeMultipleOperation {X:UU} (op : MultipleOperation X) : Type
+    := ∏ x , op (flattenUnorderedSequence x) = composeMultipleOperation op x.
 
 End Mult.
+Local Set Universe Checking.
 
 Definition AssociativeMultipleOperation {X} := ∑ op:MultipleOperation X, isAssociativeMultipleOperation op.
 

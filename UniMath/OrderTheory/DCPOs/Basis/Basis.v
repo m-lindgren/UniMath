@@ -50,8 +50,6 @@ Require Import UniMath.OrderTheory.DCPOs.Basis.Continuous.
 
 Local Open Scope dcpo.
 
-Unset Universe Checking.
-
 Section BasisInDCPO.
   Context {X : dcpo}.
 
@@ -167,8 +165,6 @@ Section BasisInDCPO.
   Qed.
 End BasisInDCPO.
 
-Set Universe Checking.
-
 Arguments dcpo_basis_data : clear implicits.
 Arguments dcpo_basis_laws : clear implicits.
 Arguments dcpo_basis : clear implicits.
@@ -247,13 +243,7 @@ Proof.
   - exact (basis_laws_from_continuous_struct CX).
 Defined.
 
-(* TODO : Enable Universe Checking
-          [dcpo_basis_le_via_approximation] is slow to type check.
- *)
-Local Unset Universe Checking.
 Section BasisProperties.
-  Context {X : dcpo}
-          (B : dcpo_basis X).
 
   (**
    4. Approximation via bases
@@ -264,6 +254,8 @@ Section BasisProperties.
    and the basis
    *)
   Proposition dcpo_basis_le_via_approximation
+              {X : dcpo}
+              (B : dcpo_basis X)
               (x y : X)
     : x ≤ y
       ≃
@@ -282,16 +274,19 @@ Section BasisProperties.
     - apply propproperty.
   Qed.
 
-  Let CX : continuous_dcpo_struct X := continuous_struct_from_basis B.
+  Let CX {X : dcpo} (B : dcpo_basis X) : continuous_dcpo_struct X
+      := continuous_struct_from_basis B.
 
   (**
    5. Interpolation using bases
    *)
   Proposition basis_nullary_interpolation
+              {X : dcpo}
+              (B : dcpo_basis X)
               (x : X)
     : ∃ (i : B), B i ≪ x.
   Proof.
-    assert (H := nullary_interpolation CX x).
+    assert (H := nullary_interpolation (CX B) x).
     revert H.
     use factor_through_squash.
     {
@@ -312,11 +307,13 @@ Section BasisProperties.
   Qed.
 
   Proposition basis_unary_interpolation
+              {X : dcpo}
+              (B : dcpo_basis X)
               {x y : X}
               (p : x ≪ y)
     : ∃ (i : B), x ≪ B i ∧ B i ≪ y.
   Proof.
-    assert (H := unary_interpolation CX p).
+    assert (H := unary_interpolation (CX B) p).
     revert H.
     use factor_through_squash.
     {
@@ -343,12 +340,14 @@ Section BasisProperties.
   Qed.
 
   Proposition basis_binary_interpolation
+              {X : dcpo}
+              (B : dcpo_basis X)
               {x₁ x₂ y : X}
               (p₁ : x₁ ≪ y)
               (p₂ : x₂ ≪ y)
     : ∃ (i : B), x₁ ≪ B i ∧ x₂ ≪ B i ∧ B i ≪ y.
   Proof.
-    assert (H := binary_interpolation CX p₁ p₂).
+    assert (H := binary_interpolation (CX B) p₁ p₂).
     revert H.
     use factor_through_squash.
     {
@@ -356,7 +355,7 @@ Section BasisProperties.
     }
     intro z.
     induction z as [ z [ q₁ [ q₂ q₃ ] ] ].
-    assert (H := basis_unary_interpolation q₃).
+    assert (H := basis_unary_interpolation B q₃).
     revert H.
     use factor_through_squash.
     {
@@ -379,6 +378,8 @@ Section BasisProperties.
    are equal on the basis elements.
    *)
   Proposition scott_continuous_map_eq_on_basis
+              {X : dcpo}
+              (B : dcpo_basis X)
               {Y : dcpo}
               {f g : scott_continuous_map X Y}
               (p : ∏ (i : B), f (B i) = g (B i))
@@ -407,6 +408,8 @@ Section BasisProperties.
   Qed.
 
   Proposition map_eq_on_basis_if_scott_continuous
+              {X : dcpo}
+              (B : dcpo_basis X)
               {Y : dcpo}
               {f g : X → Y}
               (p : ∏ (i : B), f (B i) = g (B i))
@@ -417,13 +420,15 @@ Section BasisProperties.
   Proof.
     exact (maponpaths
              (λ z, pr1 z x)
-             (@scott_continuous_map_eq_on_basis Y (f ,, Hf) (g ,, Hg) p)).
+             (@scott_continuous_map_eq_on_basis X B Y (f ,, Hf) (g ,, Hg) p)).
   Qed.
 
   (**
    7. The order on maps via basis elements
    *)
   Proposition scott_continuous_map_le_on_basis
+              {X : dcpo}
+              (B : dcpo_basis X)
               {Y : dcpo}
               {f g : scott_continuous_map X Y}
               (p : ∏ (i : B), f (B i) ≤ g (B i))
@@ -442,6 +447,8 @@ Section BasisProperties.
   Qed.
 
   Proposition map_le_on_basis_if_scott_continuous
+              {X : dcpo}
+              (B : dcpo_basis X)
               {Y : dcpo}
               {f g : X → Y}
               (p : ∏ (i : B), f (B i) ≤ g (B i))
@@ -450,18 +457,20 @@ Section BasisProperties.
               (x : X)
     : f x ≤ g x.
   Proof.
-    exact (@scott_continuous_map_le_on_basis Y (f ,, Hf) (g ,, Hg) p x).
+    exact (@scott_continuous_map_le_on_basis X B Y (f ,, Hf) (g ,, Hg) p x).
   Qed.
 
   (**
    8. Constructing maps from their action on the basis
    *)
   Section ScottContinuousFromBasis.
-    Context {Y : dcpo}
-            (f : B → Y)
-            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂).
 
     Proposition is_directed_map_from_basis
+            {X : dcpo}
+            (B : dcpo_basis X)
+            {Y : dcpo}
+            (f : B → Y)
+            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂)
                 (x : X)
       : is_directed Y (λ (i : basis_below_element B x), f (pr1 i)).
     Proof.
@@ -489,26 +498,41 @@ Section BasisProperties.
         + apply Hf.
           exact q.
     Qed.
-
+Unset Printing Universes.
     Definition map_directed_set_from_basis
+            {X : dcpo}
+            (B : dcpo_basis X)
+            {Y : dcpo}
+            (f : B → Y)
+            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂)
                (x : X)
       : directed_set Y.
     Proof.
       use make_directed_set.
       - exact (basis_below_element B x).
       - exact (λ i, f (pr1 i)).
-      - exact (is_directed_map_from_basis x).
+      - exact (is_directed_map_from_basis B f Hf x).
     Defined.
 
     Definition map_from_basis
+            {X : dcpo}
+            (B : dcpo_basis X)
+            {Y : dcpo}
+            (f : B → Y)
+            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂)
                (x : X)
       : Y
-      := ⨆ (map_directed_set_from_basis x).
+      := ⨆ (map_directed_set_from_basis B f Hf x).
 
     Proposition map_from_basis_monotone
+            {X : dcpo}
+            (B : dcpo_basis X)
+            {Y : dcpo}
+            (f : B → Y)
+            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂)
                 (x₁ x₂ : X)
                 (p : x₁ ≤ x₂)
-      : map_from_basis x₁ ≤ map_from_basis x₂.
+      : map_from_basis B f Hf x₁ ≤ map_from_basis B f Hf x₂.
     Proof.
       unfold map_from_basis.
       use dcpo_lub_is_least ; cbn.
@@ -521,10 +545,15 @@ Section BasisProperties.
     Qed.
 
     Proposition map_from_basis_lub
+            {X : dcpo}
+            (B : dcpo_basis X)
+            {Y : dcpo}
+            (f : B → Y)
+            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂)
                 (D : directed_set X)
-      : map_from_basis (⨆ D)
+      : map_from_basis B f Hf (⨆ D)
         =
-        ⨆_{ D} (map_from_basis ,, map_from_basis_monotone).
+        ⨆_{ D} (map_from_basis B f Hf ,, map_from_basis_monotone B f Hf).
     Proof.
       unfold map_from_basis.
       use antisymm_dcpo.
@@ -532,7 +561,7 @@ Section BasisProperties.
         use dcpo_lub_is_least ; cbn.
         intro i.
         induction i as [ i p ] ; cbn.
-        assert (H := unary_interpolation CX p).
+        assert (H := unary_interpolation (CX B) p).
         revert H.
         use factor_through_squash.
         {
@@ -573,20 +602,35 @@ Section BasisProperties.
     Qed.
 
     Proposition is_scott_continuous_map_from_basis
-      : is_scott_continuous (pr2 X) (pr2 Y) map_from_basis.
+            {X : dcpo}
+            (B : dcpo_basis X)
+            {Y : dcpo}
+            (f : B → Y)
+            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂)
+      : is_scott_continuous (pr2 X) (pr2 Y) (map_from_basis B f Hf).
     Proof.
       use make_is_scott_continuous.
-      - exact map_from_basis_monotone.
-      - exact map_from_basis_lub.
+      - apply map_from_basis_monotone.
+      - apply map_from_basis_lub.
     Qed.
 
     Definition scott_continuous_map_from_basis
+            {X : dcpo}
+            (B : dcpo_basis X)
+            {Y : dcpo}
+            (f : B → Y)
+            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂)
       : scott_continuous_map X Y
-      := map_from_basis ,, is_scott_continuous_map_from_basis.
+      := map_from_basis B f Hf ,, is_scott_continuous_map_from_basis B f Hf.
 
     Proposition scott_continuous_map_from_basis_le
+            {X : dcpo}
+            (B : dcpo_basis X)
+            {Y : dcpo}
+            (f : B → Y)
+            (Hf : ∏ (i₁ i₂ : B), B i₁ ≤ B i₂ → f i₁ ≤ f i₂)
                 (i : B)
-      : scott_continuous_map_from_basis (B i) ≤ f i.
+      : scott_continuous_map_from_basis B f Hf (B i) ≤ f i.
     Proof.
       use dcpo_lub_is_least ; cbn.
       intro j.

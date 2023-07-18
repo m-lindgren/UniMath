@@ -72,25 +72,29 @@ Definition algebraic_dcpo_struct
      is_least_upperbound X D x.
 
 Section AlgebraicDCPOAccessors.
-  Context {X : dcpo}
-          (AX : algebraic_dcpo_struct X).
 
   Definition compact_approximating_family
+             {X : dcpo}
+             (AX : algebraic_dcpo_struct X)
              (x : X)
     : directed_set X
     := pr1 (AX x).
 
   Proposition is_compact_approximating_family
+              {X : dcpo}
+              (AX : algebraic_dcpo_struct X)
               (x : X)
-              (i : compact_approximating_family x)
-    : is_compact_el (compact_approximating_family x i).
+              (i : compact_approximating_family AX x)
+    : is_compact_el (compact_approximating_family AX x i).
   Proof.
     exact (pr12 (AX x) i).
   Qed.
 
   Proposition compact_approximating_family_lub
+              {X : dcpo}
+              (AX : algebraic_dcpo_struct X)
               (x : X)
-    : ⨆ (compact_approximating_family x) = x.
+    : ⨆ (compact_approximating_family AX x) = x.
   Proof.
     use antisymm_dcpo.
     - use dcpo_lub_is_least.
@@ -102,11 +106,13 @@ Section AlgebraicDCPOAccessors.
   Qed.
 
   Proposition compact_approximating_family_way_below
+              {X : dcpo}
+              (AX : algebraic_dcpo_struct X)
               (x : X)
-              (i : compact_approximating_family x)
-    : compact_approximating_family x i ≪ x.
+              (i : compact_approximating_family AX x)
+    : compact_approximating_family AX x i ≪ x.
   Proof.
-    refine (trans_way_below_le (is_compact_approximating_family x i) _).
+    refine (trans_way_below_le (is_compact_approximating_family AX x i) _).
     exact (pr122 (AX x) i).
   Qed.
 End AlgebraicDCPOAccessors.

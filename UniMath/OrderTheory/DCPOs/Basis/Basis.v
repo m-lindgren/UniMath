@@ -274,7 +274,7 @@ Section BasisProperties.
     - apply propproperty.
   Qed.
 
-  Let CX {X : dcpo} (B : dcpo_basis X) : continuous_dcpo_struct X
+  Local Definition CX {X : dcpo} (B : dcpo_basis X) : continuous_dcpo_struct X
       := continuous_struct_from_basis B.
 
   (**

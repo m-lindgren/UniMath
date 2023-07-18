@@ -70,28 +70,31 @@ Definition is_continuous_dcpo
 (* TODO : Enable Universe Checking
           [approximating_family_lub] and [unary_interpolation] are
           very slow to type check. *)
-Local Unset Universe Checking.
+
 Section ContinuousDCPOAccessors.
 
-  Context {X : dcpo}
-          (CX : continuous_dcpo_struct X).
-
   Definition approximating_family
+             {X : dcpo}
+             (CX : continuous_dcpo_struct X)
              (x : X)
     : directed_set X
     := pr1 (CX x).
 
   Proposition approximating_family_way_below
+              {X : dcpo}
+              {CX : continuous_dcpo_struct X}
               (x : X)
-              (i : approximating_family x)
-    : approximating_family x i ≪ x.
+              (i : approximating_family CX x)
+    : approximating_family CX x i ≪ x.
   Proof.
     exact (pr12 (CX x) i).
   Qed.
 
   Proposition approximating_family_lub
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               (x : X)
-    : ⨆ (approximating_family x) = x.
+    : ⨆ (approximating_family CX x) = x.
   Proof.
     use antisymm_dcpo.
     - use dcpo_lub_is_least.
@@ -105,13 +108,13 @@ Section ContinuousDCPOAccessors.
 End ContinuousDCPOAccessors.
 
 Section PropertiesContinuousDCPO.
-  Context {X : dcpo}
-          (CX : continuous_dcpo_struct X).
 
   (**
    3. Equivalent formulations of inequality in continuous DCPOs
    *)
   Proposition continuous_dcpo_struct_le_to_way_below
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               {x y : X}
               (p : x ≤ y)
               (i : approximating_family CX x)
@@ -122,6 +125,8 @@ Section PropertiesContinuousDCPO.
   Qed.
 
   Proposition continuous_dcpo_struct_approx_way_below_to_le
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               {x y : X}
               (p : ∏ (i : approximating_family CX x),
                    approximating_family CX x i ≪ y)
@@ -131,8 +136,10 @@ Section PropertiesContinuousDCPO.
     use way_below_to_le.
     apply p.
   Qed.
-
+  Unset Printing Universes.
   Proposition continuous_dcpo_struct_approx_le_to_le
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               {x y : X}
               (p : ∏ (i : approximating_family CX x),
                    approximating_family CX x i ≤ y)
@@ -144,6 +151,8 @@ Section PropertiesContinuousDCPO.
   Qed.
 
   Proposition continuous_dcpo_struct_le_weq_approx_le
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               (x y : X)
     : x ≤ y
       ≃
@@ -157,13 +166,15 @@ Section PropertiesContinuousDCPO.
       apply continuous_dcpo_struct_le_to_way_below.
       exact p.
     - intros H.
-      apply continuous_dcpo_struct_approx_le_to_le.
+      apply(continuous_dcpo_struct_approx_le_to_le CX).
       exact H.
     - apply propproperty.
     - apply propproperty.
   Qed.
 
   Proposition continuous_dcpo_struct_le_weq_approx_way_below
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               (x y : X)
     : x ≤ y
       ≃
@@ -171,9 +182,9 @@ Section PropertiesContinuousDCPO.
       approximating_family CX x i ≪ y.
   Proof.
     use weqimplimpl.
-    - exact continuous_dcpo_struct_le_to_way_below.
+    - exact(continuous_dcpo_struct_le_to_way_below CX).
     - intros H.
-      apply continuous_dcpo_struct_approx_le_to_le.
+      apply(continuous_dcpo_struct_approx_le_to_le CX).
       intro i.
       apply continuous_dcpo_struct_approx_way_below_to_le.
       exact H.
@@ -182,6 +193,8 @@ Section PropertiesContinuousDCPO.
   Qed.
 
   Proposition continuous_dcpo_struct_le_via_approximation
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               (x y : X)
     : x ≤ y
       ≃
@@ -207,6 +220,8 @@ Section PropertiesContinuousDCPO.
    4. Characterization of the way-below relation in continuous DCPOs
    *)
   Proposition continuous_dcpo_struct_way_below
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               (x y : X)
     : x ≪ y
       ≃
@@ -233,6 +248,8 @@ Section PropertiesContinuousDCPO.
    5. Nullary interpolation
    *)
   Proposition nullary_interpolation
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               (x : X)
     : ∃ (y : X), y ≪ x.
   Proof.
@@ -252,17 +269,29 @@ Section PropertiesContinuousDCPO.
    6. Unary interpolation
    *)
   Section UnaryInterpolation.
-    Context {x y : X}
-            (p : x ≪ y).
 
-    Let D : directed_set X := approximating_family CX y.
-    Let D_a : D → directed_set X := λ i, approximating_family CX (D i).
+    Local Definition D {X : dcpo} {x y : X}
+      (CX : continuous_dcpo_struct X)
+      (p : x ≪ y)
+      : directed_set X
+      := approximating_family CX y.
+
+    Local Definition D_a {X : dcpo}
+      (CX : continuous_dcpo_struct X)
+      {x y : X}
+      (p : x ≪ y)
+      : D CX p -> directed_set X
+      := λ i, approximating_family CX (D CX p i).
 
     Proposition unary_interpolation_cofinal_lem
-                {i₁ i₂ : D}
-                (q : D i₁ ≤ D i₂)
-                (j₁ : D_a i₁)
-      : D_a i₁ j₁ ≪ ⨆ (D_a i₂).
+                {X : dcpo}
+                (CX : continuous_dcpo_struct X)
+                {x y : X}
+                (p : x ≪ y)
+                {i₁ i₂ : D CX p}
+                (q : D CX p i₁ ≤ D CX p i₂)
+                (j₁ : D_a CX p i₁)
+      : D_a CX p i₁ j₁ ≪ ⨆ (D_a CX p i₂).
     Proof.
       refine (trans_way_below_le _ _).
       - apply approximating_family_way_below.
@@ -273,24 +302,32 @@ Section PropertiesContinuousDCPO.
     Qed.
 
     Proposition unary_interpolation_cofinal
-                {i₁ i₂ : D}
-                (q : D i₁ ≤ D i₂)
-                (j₁ : D_a i₁)
-      : ∃ (j₂ : D_a i₂), D_a i₁ j₁ ≤ D_a i₂ j₂.
+                {X : dcpo}
+                (CX : continuous_dcpo_struct X)
+                {x y : X}
+                (p : x ≪ y)
+                {i₁ i₂ : D CX p}
+                (q : D CX p i₁ ≤ D CX p i₂)
+                (j₁ : D_a CX p i₁)
+      : ∃ (j₂ : D_a CX p i₂), D_a CX p i₁ j₁ ≤ D_a CX p i₂ j₂.
     Proof.
-      use (unary_interpolation_cofinal_lem q j₁ (D_a i₂)).
+      use (unary_interpolation_cofinal_lem CX p q j₁ (D_a CX p i₂)).
       apply refl_dcpo.
     Qed.
 
     Proposition is_directed_unary_interpolation_directed_set
-      : is_directed X (λ (ij : ∑ (i : D), D_a i), D_a (pr1 ij) (pr2 ij)).
+          {X : dcpo}
+          (CX : continuous_dcpo_struct X)
+          {x y : X}
+          (p : x ≪ y)
+      : is_directed X (λ (ij : ∑ (i : D CX p), D_a CX p i), D_a CX p (pr1 ij) (pr2 ij)).
     Proof.
       split.
-      - assert (H := directed_set_el D).
+      - assert (H := directed_set_el (D CX p)).
         revert H.
         use factor_through_squash ; [ apply propproperty | ].
         intro i.
-        assert (H := directed_set_el (D_a i)).
+        assert (H := directed_set_el (D_a CX p i)).
         revert H.
         use factor_through_squash ; [ apply propproperty | ].
         intro j.
@@ -298,22 +335,22 @@ Section PropertiesContinuousDCPO.
       - intros ij₁ ij₂.
         induction ij₁ as [ i₁ j₁ ].
         induction ij₂ as [ i₂ j₂ ].
-        assert (H := directed_set_top D i₁ i₂).
+        assert (H := directed_set_top (D CX p) i₁ i₂).
         revert H.
         use factor_through_squash ; [ apply propproperty | ].
         intros k.
         induction k as [ k [ q₁ q₂ ]].
-        assert (H := unary_interpolation_cofinal q₁ j₁).
+        assert (H := unary_interpolation_cofinal CX p q₁ j₁).
         revert H.
         use factor_through_squash ; [ apply propproperty | ].
         intros H₁.
         induction H₁ as [ l₁ H₁ ].
-        assert (H := unary_interpolation_cofinal q₂ j₂).
+        assert (H := unary_interpolation_cofinal CX p q₂ j₂).
         revert H.
         use factor_through_squash ; [ apply propproperty | ].
         intros H₂.
         induction H₂ as [ l₂ H₂ ].
-        assert (H := directed_set_top (D_a k) l₁ l₂).
+        assert (H := directed_set_top (D_a CX p k) l₁ l₂).
         revert H.
         use factor_through_squash ; [ apply propproperty | ].
         intros H.
@@ -324,22 +361,30 @@ Section PropertiesContinuousDCPO.
     Qed.
 
     Definition unary_interpolation_directed_set
+          {X : dcpo}
+          (CX : continuous_dcpo_struct X)
+          {x y : X}
+          (p : x ≪ y)
       : directed_set X.
     Proof.
       use make_directed_set.
-      - exact (∑ (i : D), D_a i).
-      - exact (λ ij, D_a (pr1 ij) (pr2 ij)).
-      - exact is_directed_unary_interpolation_directed_set.
+      - exact (∑ (i : D CX p), D_a CX p i).
+      - exact (λ ij, D_a CX p (pr1 ij) (pr2 ij)).
+      - apply is_directed_unary_interpolation_directed_set.
     Defined.
 
     Proposition unary_interpolation
+          {X : dcpo}
+          (CX : continuous_dcpo_struct X)
+          {x y : X}
+          (p : x ≪ y)
       : ∃ (z : X), x ≪ z ∧ z ≪ y.
     Proof.
-      assert (s : y ≤ ⨆ unary_interpolation_directed_set).
+      assert (s : y ≤ ⨆ (unary_interpolation_directed_set CX p)).
       {
-        use continuous_dcpo_struct_approx_le_to_le.
+        use(continuous_dcpo_struct_approx_le_to_le CX).
         intro i.
-        use continuous_dcpo_struct_approx_le_to_le.
+        use(continuous_dcpo_struct_approx_le_to_le CX).
         intro j.
         use less_than_dcpo_lub.
         {
@@ -347,7 +392,7 @@ Section PropertiesContinuousDCPO.
         }
         apply refl_dcpo.
       }
-      assert (H := p unary_interpolation_directed_set s).
+      assert (H := p (unary_interpolation_directed_set CX p) s).
       revert H.
       use factor_through_squash.
       {
@@ -355,7 +400,7 @@ Section PropertiesContinuousDCPO.
       }
       intro i.
       induction i as [ i r ].
-      refine (hinhpr (D (pr1 i) ,, _ ,, _)).
+      refine (hinhpr (D CX p (pr1 i) ,, _ ,, _)).
       - refine (trans_le_way_below r _).
         apply approximating_family_way_below.
       - apply approximating_family_way_below.
@@ -366,6 +411,8 @@ Section PropertiesContinuousDCPO.
    7. Binary interpolation
    *)
   Proposition binary_interpolation
+              {X : dcpo}
+              (CX : continuous_dcpo_struct X)
               {x₁ x₂ y : X}
               (p₁ : x₁ ≪ y)
               (p₂ : x₂ ≪ y)
@@ -378,7 +425,7 @@ Section PropertiesContinuousDCPO.
       rewrite approximating_family_lub.
       apply refl_dcpo.
     }
-    assert (z₁ := unary_interpolation p₁).
+    assert (z₁ := unary_interpolation CX p₁).
     revert z₁.
     use factor_through_squash.
     {
@@ -394,7 +441,7 @@ Section PropertiesContinuousDCPO.
     }
     intro H.
     induction H as [ i₁ H₁ ].
-    assert (z₂ := unary_interpolation p₂).
+    assert (z₂ := unary_interpolation CX p₂).
     revert z₂.
     use factor_through_squash.
     {

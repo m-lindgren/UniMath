@@ -29,14 +29,14 @@ Notation UU := Type (only parsing).
 Notation UU0 := Type@{Set} (only parsing).
 
 (** The empty type *)
-Inductive empty : UU0 := .
+Inductive empty : Type := .
 Notation "∅" := empty.
 Scheme Induction for empty Sort Type.
 Scheme Minimality for empty Sort Type.
 Definition empty_rec := empty_rect.
 
 (** The one-element type *)
-Inductive unit : UU0 :=
+Inductive unit : Type :=
   tt : unit.
 Scheme Induction for unit Sort Type.
 Scheme Minimality for unit Sort Type.

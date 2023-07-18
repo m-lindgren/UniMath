@@ -14,15 +14,16 @@ Defined.
 Corollary squash_to_hProp {X:UU} {Q:hProp} : ∥ X ∥ -> (X -> Q) -> Q.
 Proof. intros h f. exact (hinhuniv f h). Defined.
 
-Lemma hdisj_impl_1 {P Q : hProp} : P∨Q -> (Q->P) -> P.
+Lemma hdisj_impl_1 {P Q : hProp} : (P ∨ Q ⇒ (Q ⇒ P) ⇒ P).
 Proof.
-  intros o f. apply (squash_to_hProp o).
-  intros [p|q].
+  intros o f.
+  apply (squash_to_hProp o).
+  intros [p | q].
   - exact p.
   - exact (f q).
 Defined.
 
-Lemma hdisj_impl_2 {P Q : hProp} : P∨Q -> (P->Q) -> Q.
+Lemma hdisj_impl_2 {P Q : hProp} : P ∨ Q ⇒ (P ⇒ Q) ⇒ Q.
 Proof.
   intros o f. apply (squash_to_hProp o).
   intros [p|q].

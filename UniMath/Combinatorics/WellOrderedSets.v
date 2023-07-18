@@ -888,7 +888,7 @@ Proof.
   - intros t tinT.
     (* now show any other element t of T is at least as big as t0' *)
     (* for that purpose, we may assume t ≤ t0' *)
-    apply (hdisj_impl_2 (chain_union_rel_istotal chain _ _)); intro tle.
+    use (hdisj_impl_2 (chain_union_rel_istotal chain _ _)); intro tle.
     set (q := chain_union_rel_initial chain j t0 t tle).
     set (t' := (pr1 t,,q) : S j).
     assert (E : subtype_inc (subtype_union_containedIn S j) t' = t).
@@ -1440,29 +1440,27 @@ Local Open Scope prop.
 (** The empty set is well-ordered *)
 Definition empty_woset : WellOrderedSet.
 Proof.
-exists (_,,isasetempty).
-use tpair.
-- intros [].
-- abstract (repeat split; try (now intros []);
+  exists (make_hSet empty isasetempty).
+  use tpair.
+  - exact(fromempty).
+  - abstract (repeat split; try (now intros []);
             now intros T t'; apply (squash_to_hProp t'); intros [[]]).
 Defined.
 
 (** The unit set is well-ordered *)
 Definition unit_woset : WellOrderedSet.
 Proof.
-exists (_,,isasetunit).
-use tpair.
-- intros x y.
-  exists (x = y).
-  abstract (apply isapropifcontr, isapropunit).
-- repeat split.
-  + now intros x y z [].
-  + now intros x.
-  + intros [] [] H H2.
-    now apply H2, inl.
-  + intros T t'; apply (squash_to_hProp t'); clear t'; intros [[] H].
-    apply hinhpr; exists tt.
-    now split; [|intros []].
+  exists unitset.
+  use tpair.
+  - use eqset.
+  - repeat split.
+    + now intros x y z [].
+    + now intros x.
+    + intros [] [] H H2.
+      now apply H2, inl.
+    + intros T t'; apply (squash_to_hProp t'); clear t'; intros [[] H].
+      apply hinhpr; exists tt.
+      now split; [|intros []].
 Defined.
 
 

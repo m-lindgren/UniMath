@@ -203,8 +203,10 @@ Notation "∥ A ∥" := (ishinh A) (at level 20) : type_scope.
 Definition hinhpr {X : UU} : X -> ∥ X ∥
   := λ x : X, λ P : hProp, fun f : X -> P => f x.
 
-Definition hinhfun {X Y : UU} (f : X -> Y) : ∥ X ∥ -> ∥ Y ∥ :=
-  fun isx : ∥ X ∥ => λ P : _, fun yp : Y -> P => isx P (λ x : X, yp (f x)).
+Definition hinhfun {X Y : UU} (f : X -> Y) : ∥ X ∥ -> ∥ Y ∥.
+  intros inx P iny.
+  exact(inx P (fun (x : X) => iny (f x))).
+Defined.
 
 (** Note that the previous definitions do not require RR1 in an essential way
   (except for the placing of [ishinh] in [hProp UU] - without RR1 it would be
@@ -433,7 +435,7 @@ Declare Scope logic.
 Notation "'¬' X" := (hneg X) (at level 35, right associativity) : logic.
   (* type this in emacs in agda-input method with \neg *)
 Delimit Scope logic with logic.
-Set Printing Universes.
+
 Definition himpl (P : UU) (Q : hProp) : hProp
   := make_hProp (P -> Q)
                 (impred_prop (λ _ : P, Q)).

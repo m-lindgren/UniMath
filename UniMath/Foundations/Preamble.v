@@ -19,7 +19,7 @@ Global Set Polymorphic Inductive Cumulativity.
 Global Unset Universe Minimization ToSet.
 Global Unset Cumulativity Weak Constraints.
 Global Set Private Polymorphic Universes.
-Global Set Printing Universes.
+Global Unset Printing Universes.
 Global Unset Strict Universe Declaration.
 
 

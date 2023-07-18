@@ -146,18 +146,20 @@ Defined.
  3. Completeness of the exponential
  *)
 Section FunctionLub.
-  Context {X Y : dcpo}
-          (D : directed_set (scott_continuous_map_PartialOrder X Y)).
 
   Definition pointwise_lub
+             {X Y : dcpo}
+             (D : directed_set (scott_continuous_map_PartialOrder X Y))
              (x : X)
     : Y
     := ⨆ (scott_continuous_app X Y x {{ D }}).
 
   Proposition is_monotone_pointwise_lub
+              {X Y : dcpo}
+              (D : directed_set (scott_continuous_map_PartialOrder X Y))
               (x₁ x₂ : X)
               (p : x₁ ≤ x₂)
-    : pointwise_lub x₁ ≤ pointwise_lub x₂.
+    : pointwise_lub D x₁ ≤ pointwise_lub D x₂.
   Proof.
     unfold pointwise_lub.
     use dcpo_lub_is_least ; cbn.
@@ -168,10 +170,12 @@ Section FunctionLub.
   Qed.
 
   Proposition is_scott_continuous_pointwise_lub
-    : is_scott_continuous X Y pointwise_lub.
+              {X Y : dcpo}
+              (D : directed_set (scott_continuous_map_PartialOrder X Y))
+    : is_scott_continuous X Y (pointwise_lub D).
   Proof.
     use make_is_scott_continuous.
-    - exact is_monotone_pointwise_lub.
+    - exact(is_monotone_pointwise_lub D).
     - intros D' ; unfold pointwise_lub.
       use antisymm_dcpo.
       + use dcpo_lub_is_least.
@@ -196,19 +200,22 @@ Section FunctionLub.
           rewrite (scott_continuous_map_on_lub (D j)).
           use less_than_dcpo_lub.
           ** exact i.
-          ** cbn.
-             apply refl_dcpo.
+          ** apply refl_dcpo.
   Qed.
 
   Definition scott_continuous_lub_map
+             {X Y : dcpo}
+             (D : directed_set (scott_continuous_map_PartialOrder X Y))
     : scott_continuous_map_hSet X Y
-    := pointwise_lub ,, is_scott_continuous_pointwise_lub.
+    := pointwise_lub D ,, is_scott_continuous_pointwise_lub D.
 
   Proposition scott_continuous_lub_map_is_least_upperbound
+              {X Y : dcpo}
+              (D : directed_set (scott_continuous_map_PartialOrder X Y))
     : is_least_upperbound
         (scott_continuous_map_PartialOrder X Y)
         D
-        scott_continuous_lub_map.
+        (scott_continuous_lub_map D).
   Proof.
     split.
     - intros i x.
@@ -223,10 +230,12 @@ Section FunctionLub.
   Qed.
 
   Definition scott_continuous_lub
+             {X Y : dcpo}
+             (D : directed_set (scott_continuous_map_PartialOrder X Y))
     : lub (scott_continuous_map_PartialOrder X Y) D
-    := scott_continuous_lub_map
+    := scott_continuous_lub_map D
        ,,
-       scott_continuous_lub_map_is_least_upperbound.
+       scott_continuous_lub_map_is_least_upperbound D.
 End FunctionLub.
 
 Definition dcpo_struct_funspace_order_complete
@@ -276,7 +285,7 @@ Proof.
     + intros f g p ; cbn in *.
       apply p.
     + intros D.
-      cbn ; unfold pointwise_lub ; cbn.
+      unfold pointwise_lub.
       use dcpo_lub_eq_pointwise.
       intros f ; cbn.
       apply idpath.
@@ -312,7 +321,7 @@ Proof.
        exact (prod_dcpo_le (x ,, z₁) (x ,, z₂) (refl_dcpo _) p)).
   - intros D.
     use eq_scott_continuous_map.
-    intro x ; cbn.
+    intro x ; simpl.
     etrans.
     {
       apply maponpaths.
@@ -330,7 +339,7 @@ Proof.
     unfold pointwise_lub.
     use antisymm_dcpo.
     + use dcpo_lub_is_least.
-      cbn ; intro i.
+      simpl ; intro i.
       use less_than_dcpo_lub ; cbn.
       * exact i.
       * apply refl_dcpo.
@@ -341,6 +350,8 @@ Proof.
       * apply refl_dcpo.
 Qed.
 
+(* TODO : Enable Universe Checking *)
+Local Unset Universe Checking.
 Definition lam_scott_continuous_map
            {X Y Z : dcpo}
            (f : scott_continuous_map (X × Z) Y)

@@ -31,10 +31,10 @@ Local Open Scope dcpo.
  1. Type indexed products
  *)
 Section TypeIndexedProductsDCPO.
-  Context {I : UU}
-          (D : I → dcpo).
 
   Definition app_directed_set_depfun
+             {I : UU}
+             (D : I → dcpo)
              (E : directed_set
                     (depfunction_poset (λ i, D i) (λ i, D i)))
              (i : I)
@@ -56,19 +56,25 @@ Section TypeIndexedProductsDCPO.
   Defined.
 
   Section DepFunctionLub.
-    Context (E : directed_set
-                   (depfunction_poset (λ i, D i) (λ i, D i))).
 
     Definition type_prod_pointwise_lub
+               {I : UU}
+               (D : I → dcpo)
+               (E : directed_set
+                      (depfunction_poset (λ i, D i) (λ i, D i)))
                (i : I)
       : D i
-      := ⨆ (app_directed_set_depfun E i).
+      := ⨆ (app_directed_set_depfun D E i).
 
     Proposition is_lub_type_prod_pointwise_lub
+                {I : UU}
+                (D : I → dcpo)
+                (E : directed_set
+                       (depfunction_poset (λ i, D i) (λ i, D i)))
       : is_least_upperbound
           (depfunction_poset (λ i : I, D i) (λ i : I, D i))
           E
-          type_prod_pointwise_lub.
+          (type_prod_pointwise_lub D E).
     Proof.
       split.
       - intros e i ; cbn.
@@ -82,61 +88,71 @@ Section TypeIndexedProductsDCPO.
   End DepFunctionLub.
 
   Definition directed_complete_depfunction
+             {I : UU}
+             (D : I → dcpo)
     : directed_complete_poset
         (depfunction_poset (λ i, D i) (λ i, D i)).
   Proof.
     intros J E HE.
     use make_lub.
-    - exact (type_prod_pointwise_lub (J ,, (E ,, HE))).
-    - exact (is_lub_type_prod_pointwise_lub (J ,, (E ,, HE))).
+    - exact (type_prod_pointwise_lub D (J ,, (E ,, HE))).
+    - exact (is_lub_type_prod_pointwise_lub D (J ,, (E ,, HE))).
   Defined.
 
   Definition depfunction_dcpo_struct
+             {I : UU}
+             (D : I → dcpo)
     : dcpo_struct (∏ y, D y)%set
-    := depfunction_poset _ (λ i, D i) ,, directed_complete_depfunction.
+    := depfunction_poset _ (λ i, D i) ,, (directed_complete_depfunction D).
 
   Definition depfunction_dcpo
+             {I : UU}
+             (D : I → dcpo)
     : dcpo
-    := _ ,, depfunction_dcpo_struct.
+    := _ ,, (depfunction_dcpo_struct D).
 
   (**
    2. The universal property
    *)
   Proposition is_scott_continuous_depfunction_pr
+              {I : UU}
+              (D : I → dcpo)
               (i : I)
     : is_scott_continuous
-        depfunction_dcpo
+        (depfunction_dcpo D)
         (D i)
         (λ f, f i).
   Proof.
     use make_is_scott_continuous.
     - exact (is_monotone_depfunction_poset_pr (λ i, D i) (λ i, D i) i).
     - intros E.
-      cbn ; unfold type_prod_pointwise_lub.
+      unfold type_prod_pointwise_lub.
       use antisymm_dcpo.
       + use dcpo_lub_is_least ; cbn.
         intro e.
         use less_than_dcpo_lub ; [ exact e | ] ; cbn.
         apply refl_dcpo.
-      + use dcpo_lub_is_least ; cbn.
+      + use dcpo_lub_is_least.
         intro e.
         use less_than_dcpo_lub ; [ exact e | ] ; cbn.
         apply refl_dcpo.
   Qed.
 
   Proposition is_scott_continuous_depfunction_map
+              {I : UU}
+              (D : I → dcpo)
               {W : dcpo}
               (fs : ∏ (i : I), scott_continuous_map W (D i))
-    : is_scott_continuous W depfunction_dcpo (λ w i, fs i w).
+    : is_scott_continuous W (depfunction_dcpo D) (λ w i, fs i w).
   Proof.
     use make_is_scott_continuous.
     - exact (is_monotone_depfunction_poset_pair fs (λ i, pr12 (fs i))).
     - intros E.
       use funextsec ; intro i.
-      cbn ; unfold type_prod_pointwise_lub.
+      unfold type_prod_pointwise_lub.
       rewrite scott_continuous_map_on_lub.
       use antisymm_dcpo.
-      + use dcpo_lub_is_least ; cbn.
+      + use dcpo_lub_is_least.
         intro e.
         use less_than_dcpo_lub ; [ exact e | ] ; cbn.
         apply refl_dcpo.
@@ -233,12 +249,11 @@ Proposition lub_is_monotone
 Proof.
   intros x y p.
   use dcpo_lub_is_least.
-  intro d ; cbn in d ; cbn.
+  intro d.
   use less_than_dcpo_lub.
   {
     exact d.
   }
-  cbn.
   apply HD.
   exact p.
 Qed.

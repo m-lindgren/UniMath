@@ -15,12 +15,12 @@ Require Import UniMath.OrderTheory.DCPOs.Examples.BinaryProducts.
 Local Open Scope dcpo.
 
 Section Coordinates.
-  Context {X Y Z : dcpo}
-          (f : X × Y → Z)
-          (Hf₁ : ∏ (x : X), is_scott_continuous Y Z (λ y, f (x ,, y)))
-          (Hf₂ : ∏ (y : Y), is_scott_continuous X Z (λ x, f (x ,, y))).
 
   Lemma scott_continuous_map_coordinates_monotone
+    {X Y Z : dcpo}
+    (f : X × Y → Z)
+    (Hf₁ : ∏ (x : X), is_scott_continuous Y Z (λ y, f (x ,, y)))
+    (Hf₂ : ∏ (y : Y), is_scott_continuous X Z (λ x, f (x ,, y)))
     : is_monotone (X × Y) Z f.
   Proof.
     intros xy₁ xy₂ pq.
@@ -33,19 +33,35 @@ Section Coordinates.
     exact (trans_PartialOrder Z r₁ r₂).
   Qed.
 
-  Let F : monotone_function (X × Y) Z
-    := _ ,, scott_continuous_map_coordinates_monotone.
-  Let Fy (D : directed_set (X × Y)) : scott_continuous_map X Z
+  Local Definition F
+    {X Y Z : dcpo}
+    (f : X × Y → Z)
+    (Hf₁ : ∏ (x : X), is_scott_continuous Y Z (λ y, f (x ,, y)))
+    (Hf₂ : ∏ (y : Y), is_scott_continuous X Z (λ x, f (x ,, y)))
+    : monotone_function (X × Y) Z
+    := _ ,, scott_continuous_map_coordinates_monotone f Hf₁ Hf₂.
+
+  Local Definition Fy
+    {X Y Z : dcpo}
+    (f : X × Y → Z)
+    (Hf₁ : ∏ (x : X), is_scott_continuous Y Z (λ y, f (x ,, y)))
+    (Hf₂ : ∏ (y : Y), is_scott_continuous X Z (λ x, f (x ,, y)))
+    (D : directed_set (X × Y))
+    : scott_continuous_map X Z
     := _ ,, Hf₂ (⨆ (π₂ {{ D }})).
 
   Lemma scott_continuous_map_coordinates_lub
+        {X Y Z : dcpo}
+        (f : X × Y → Z)
+        (Hf₁ : ∏ (x : X), is_scott_continuous Y Z (λ y, f (x ,, y)))
+        (Hf₂ : ∏ (y : Y), is_scott_continuous X Z (λ x, f (x ,, y)))
         (D : directed_set (X × Y))
-    : F (⨆ D) = ⨆ (F {{ D }}).
+    : F f Hf₁ Hf₂ (⨆ D) = ⨆ (F f Hf₁ Hf₂ {{ D }}).
   Proof.
     rewrite prod_dcpo_lub.
     etrans.
     {
-      exact (scott_continuous_map_on_lub (Fy D) (π₁ {{ D }})).
+      exact (scott_continuous_map_on_lub (Fy f Hf₁ Hf₂ D) (π₁ {{ D }})).
     }
     refine (_ @ !(monotone_prod_map_fubini_pair_l _ _)).
     use dcpo_lub_eq_pointwise.
@@ -60,13 +76,17 @@ Section Coordinates.
   Qed.
 
   Proposition scott_continuous_map_coordinates
+        {X Y Z : dcpo}
+        (f : X × Y → Z)
+        (Hf₁ : ∏ (x : X), is_scott_continuous Y Z (λ y, f (x ,, y)))
+        (Hf₂ : ∏ (y : Y), is_scott_continuous X Z (λ x, f (x ,, y)))
     : scott_continuous_map (X × Y) Z.
   Proof.
     refine (f ,, _).
     use is_scott_continuous_chosen_lub.
-    - exact scott_continuous_map_coordinates_monotone.
+    - apply scott_continuous_map_coordinates_monotone; assumption.
     - intros I D HD.
-      exact (scott_continuous_map_coordinates_lub (I ,, D ,, HD)).
+      exact (scott_continuous_map_coordinates_lub _ _ _ (I ,, D ,, HD)).
   Defined.
 End Coordinates.
 

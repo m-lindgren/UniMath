@@ -34,7 +34,7 @@ Section Directed.
 
   Definition is_directed
     : hProp
-    := ∥ I ∥ ∧ ∀ (i j : I), ∃ (k : I), PX (D i) (D k) × PX (D j) (D k).
+    := ∥ I ∥ ∧ ∀ (i j : I), ∃ (k : I), PX (D i) (D k) ∧ PX (D j) (D k).
 
   Definition is_directed_el
              (H : is_directed)
@@ -218,7 +218,7 @@ Proof.
     intros k₁ k₂.
     induction k₁ as [ k₁ [ H₁ H₂ ]].
     induction k₂ as [ k₂ [ H₃ H₄ ]].
-    refine (hinhpr ((k₁ ,, k₂) ,, _)) ; cbn.
+    refine (hinhpr ((k₁ ,, k₂) ,, _)).
     split.
     + exact (H₁ ,, H₃).
     + exact (H₂ ,, H₄).

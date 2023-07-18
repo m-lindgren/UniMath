@@ -50,28 +50,30 @@ Notation "x ≤s y" := (dcpo_specialization x y) (at level 70) : dcpo.
  2. Properties of the specialization preorder
  *)
 Section PropertiesSpecialization.
-  Context {X : dcpo}.
 
   Proposition refl_dcpo_specialization
+              {X : dcpo}
               (x : X)
     : x ≤s x.
   Proof.
     intros P HP Px.
     exact Px.
   Qed.
-
+Unset Printing Universes.
   Proposition trans_dcpo_specialization
+              {X : dcpo}
               {x y z : X}
               (p : x ≤s y)
               (q : y ≤s z)
     : x ≤s z.
   Proof.
     intros P HP Px.
-    apply (q P HP).
-    apply (p P HP Px).
+    use (q P HP).
+    exact (p P HP Px).
   Qed.
 
   Proposition le_dcpo_specialization
+              {X : dcpo}
               {x y : X}
               (p : x ≤ y)
     : x ≤s y.
@@ -81,6 +83,7 @@ Section PropertiesSpecialization.
   Qed.
 
   Proposition le_dcpo_specialization_equiv
+              {X : dcpo}
               (CX : continuous_dcpo_struct X)
               (x y : X)
     : x ≤ y ≃ x ≤s y.
@@ -112,9 +115,9 @@ Notation "x ⊄ y" := (dcpo_not_specialization x y) (at level 70) : dcpo. (* \ns
  4. Properties of the 'does not specialize' relation
  *)
 Section PropertiesNotSpecialization.
-  Context {X : dcpo}.
 
   Proposition irrefl_dcpo_not_specialization
+              {X : dcpo}
               (x : X)
     : ¬(x ⊄ x).
   Proof.
@@ -128,6 +131,7 @@ Section PropertiesNotSpecialization.
   Qed.
 
   Proposition dcpo_not_specialization_le
+              {X : dcpo}
               {x y : X}
               (p : x ⊄ y)
     : ¬(x ≤ y).
@@ -145,6 +149,7 @@ Section PropertiesNotSpecialization.
   Qed.
 
   Proposition continuous_not_specialization_weq
+              {X : dcpo}
               (CX : continuous_dcpo_struct X)
               (x y : X)
     : x ⊄ y ≃ (∃ (b : X), b ≪ x ∧ ¬(b ≤ y))%logic.
@@ -208,9 +213,9 @@ Notation "x # y" := (dcpo_intrinsic_apartness x y).
  6. Properties of the intrinsic apartness relation
  *)
 Section PropertiesApartness.
-  Context {X : dcpo}.
 
   Proposition irrefl_intrinsic_apartness
+              {X : dcpo}
               (x : X)
     : ¬(x # x).
   Proof.
@@ -227,6 +232,7 @@ Section PropertiesApartness.
   Qed.
 
   Proposition symmetric_intrinsic_apartness
+              {X : dcpo}
               {x y : X}
               (p : x # y)
     : y # x.
@@ -243,6 +249,7 @@ Section PropertiesApartness.
   Qed.
 
   Proposition intrinsic_apartness_not_eq
+              {X : dcpo}
               {x y : X}
               (p : x # y)
     : ¬(x = y).

@@ -415,22 +415,20 @@ Proof.
   exact (is_monotone_scott_continuous_map f p).
 Defined.
 
-(* TODO : Enable Universe Checking. The following section is very
-   slow to type check when universe checking is enabled. *)
-Local Unset Universe Checking.
 Section MakeScottContinuous.
 
-  Context {X Y : dcpo}
-          (f : X → Y)
-          (Hf₁ : ∏ (x₁ x₂ : X), x₁ ≤ x₂ → f x₁ ≤ f x₂).
-
   Definition make_dcpo_is_monotone
+          {X Y : dcpo}
+          (f : X → Y)
+          (Hf₁ : ∏ (x₁ x₂ : X), x₁ ≤ x₂ → f x₁ ≤ f x₂)
     : monotone_function X Y
     := f ,, Hf₁.
 
-  Context (Hf₂ : ∏ (D : directed_set X), f (⨆ D) = ⨆_{D} (f ,, Hf₁)).
-
   Definition make_is_scott_continuous
+          {X Y : dcpo}
+          (f : X → Y)
+          (Hf₁ : ∏ (x₁ x₂ : X), x₁ ≤ x₂ → f x₁ ≤ f x₂)
+          (Hf₂ : ∏ (D : directed_set X), f (⨆ D) = ⨆_{D} (f ,, Hf₁))
     : is_scott_continuous X Y f.
   Proof.
     use is_scott_continuous_chosen_lub.
@@ -439,7 +437,6 @@ Section MakeScottContinuous.
       exact (Hf₂ (I ,, (D ,, HD))).
   Qed.
 End MakeScottContinuous.
-Local Set Universe Checking.
 
 Proposition scott_continuous_map_on_lub
             {X Y : dcpo}

@@ -415,11 +415,11 @@ Qed.
  7. A basis for the product
  *)
 Section ProductBasis.
-  Context {X Y : dcpo}
-          (BX : dcpo_basis X)
-          (BY : dcpo_basis Y).
 
   Proposition way_below_prod_pr1
+              {X Y : dcpo}
+              (BX : dcpo_basis X)
+              (BY : dcpo_basis Y)
               {xy₁ xy₂ : prod_dcpo X Y}
               (p : xy₁ ≪ xy₂)
     : pr1 xy₁ ≪ pr1 xy₂.
@@ -445,6 +445,9 @@ Section ProductBasis.
   Qed.
 
   Proposition way_below_prod_pr2
+              {X Y : dcpo}
+              (BX : dcpo_basis X)
+              (BY : dcpo_basis Y)
               {xy₁ xy₂ : prod_dcpo X Y}
               (p : xy₁ ≪ xy₂)
     : pr2 xy₁ ≪ pr2 xy₂.
@@ -470,6 +473,9 @@ Section ProductBasis.
   Qed.
 
   Proposition to_way_below_prod
+              {X Y : dcpo}
+              (BX : dcpo_basis X)
+              (BY : dcpo_basis Y)
               {xy₁ xy₂ : prod_dcpo X Y}
               (p : pr1 xy₁ ≪ pr1 xy₂)
               (q : pr2 xy₁ ≪ pr2 xy₂)
@@ -507,21 +513,27 @@ Section ProductBasis.
   Qed.
 
   Proposition way_below_prod_weq
+              {X Y : dcpo}
+              (BX : dcpo_basis X)
+              (BY : dcpo_basis Y)
               (xy₁ xy₂ : prod_dcpo X Y)
     : xy₁ ≪ xy₂ ≃ ((pr1 xy₁ ≪ pr1 xy₂) ∧ (pr2 xy₁ ≪ pr2 xy₂)).
   Proof.
     use weqimplimpl.
     - intros p.
       split.
-      + exact (way_below_prod_pr1 p).
-      + exact (way_below_prod_pr2 p).
+      + apply way_below_prod_pr1; assumption.
+      + apply way_below_prod_pr2; assumption.
     - intros p.
-      exact (to_way_below_prod (pr1 p) (pr2 p)).
+      exact (to_way_below_prod BX BY (pr1 p) (pr2 p)).
     - apply propproperty.
     - apply propproperty.
   Qed.
 
   Definition prod_dcpo_basis_data
+              {X Y : dcpo}
+              (BX : dcpo_basis X)
+              (BY : dcpo_basis Y)
     : dcpo_basis_data (prod_dcpo X Y).
   Proof.
     use make_dcpo_basis_data.
@@ -530,7 +542,10 @@ Section ProductBasis.
   Defined.
 
   Proposition prod_dcpo_basis_laws
-    : dcpo_basis_laws (X × Y) prod_dcpo_basis_data.
+              {X Y : dcpo}
+              (BX : dcpo_basis X)
+              (BY : dcpo_basis Y)
+    : dcpo_basis_laws (X × Y) (prod_dcpo_basis_data BX BY).
   Proof.
     intros xy.
     split.
@@ -552,14 +567,14 @@ Section ProductBasis.
         intros b.
         induction b as [ b q ].
         refine (hinhpr ((a ,, b) ,, _)).
-        use to_way_below_prod.
+        use(to_way_below_prod BX BY).
         * exact p.
         * exact q.
       + intros ij₁ ij₂.
         assert (H := directed_set_top
                        (directed_set_from_basis BX (pr1 xy))
-                       (pr11 ij₁ ,, way_below_prod_pr1 (pr2 ij₁))
-                       (pr11 ij₂ ,, way_below_prod_pr1 (pr2 ij₂))).
+                       (pr11 ij₁ ,, way_below_prod_pr1 BX BY (pr2 ij₁))
+                       (pr11 ij₂ ,, way_below_prod_pr1 BX BY (pr2 ij₂))).
         revert H.
         use factor_through_squash.
         {
@@ -569,8 +584,8 @@ Section ProductBasis.
         induction k as [ k [ p₁ p₂ ]].
         assert (H := directed_set_top
                        (directed_set_from_basis BY (pr2 xy))
-                       (pr21 ij₁ ,, way_below_prod_pr2 (pr2 ij₁))
-                       (pr21 ij₂ ,, way_below_prod_pr2 (pr2 ij₂))).
+                       (pr21 ij₁ ,, way_below_prod_pr2 BX BY (pr2 ij₁))
+                       (pr21 ij₂ ,, way_below_prod_pr2 BX BY (pr2 ij₂))).
         revert H.
         use factor_through_squash.
         {
@@ -581,7 +596,7 @@ Section ProductBasis.
         simple refine (hinhpr (((_ ,, _) ,, _) ,, (_ ,, _) ,, (_ ,, _))).
         * exact (pr1 k).
         * exact (pr1 l).
-        * use to_way_below_prod.
+        * use(to_way_below_prod BX BY).
           ** exact (pr2 k).
           ** exact (pr2 l).
         * exact p₁.
@@ -594,7 +609,7 @@ Section ProductBasis.
           refine (is_least_upperbound_is_upperbound
                     (is_least_upperbound_basis BX (pr1 xy))
                     (pr11 a ,, _)).
-          apply (way_below_prod_pr1 (pr2 a)).
+          apply (way_below_prod_pr1 BX BY (pr2 a)).
         * intros a Ha.
           apply (is_least_upperbound_is_least
                    (is_least_upperbound_basis BX (pr1 xy))).
@@ -608,7 +623,7 @@ Section ProductBasis.
           intro H.
           induction H as [ c p ].
           simple refine (Ha ((pr1 b ,, c) ,, _)).
-          use to_way_below_prod.
+          use(to_way_below_prod BX BY).
           ** exact (pr2 b).
           ** exact p.
       + split.
@@ -616,7 +631,7 @@ Section ProductBasis.
           refine (is_least_upperbound_is_upperbound
                     (is_least_upperbound_basis BY (pr2 xy))
                     (pr21 a ,, _)).
-          apply (way_below_prod_pr2 (pr2 a)).
+          apply (way_below_prod_pr2 BX BY (pr2 a)).
         * intros a Ha.
           apply (is_least_upperbound_is_least
                    (is_least_upperbound_basis BY (pr2 xy))).
@@ -630,17 +645,20 @@ Section ProductBasis.
           intro H.
           induction H as [ c p ].
           simple refine (Ha ((c ,, pr1 b) ,, _)).
-          use to_way_below_prod.
+          use(to_way_below_prod BX BY).
           ** exact p.
           ** exact (pr2 b).
   Qed.
 
   Definition prod_dcpo_basis
+             {X Y : dcpo}
+             (BX : dcpo_basis X)
+             (BY : dcpo_basis Y)
     : dcpo_basis (prod_dcpo X Y).
   Proof.
     use make_dcpo_basis.
-    - exact prod_dcpo_basis_data.
-    - exact prod_dcpo_basis_laws.
+    - apply (prod_dcpo_basis_data BX BY).
+    - apply prod_dcpo_basis_laws.
   Defined.
 End ProductBasis.
 

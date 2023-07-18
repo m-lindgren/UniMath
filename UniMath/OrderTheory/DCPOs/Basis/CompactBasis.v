@@ -40,24 +40,26 @@ Require Import UniMath.OrderTheory.DCPOs.Basis.Basis.
 Local Open Scope dcpo.
 
 Section CompactBasisInDCPO.
-  Context {X : dcpo}.
 
   (**
    1. Compact basis
    *)
   Definition compact_basis_le_element
+             {X : dcpo}
              (B : dcpo_basis_data X)
              (x : X)
     : UU
     := ∑ (b : B), B b ≤ x.
 
   Definition compact_basis_le_map
+             {X : dcpo}
              (B : dcpo_basis_data X)
              (x : X)
     : compact_basis_le_element B x → X
     := λ b, B(pr1 b).
 
   Definition compact_basis_laws
+             {X : dcpo}
              (B : dcpo_basis_data X)
     : UU
     := (∏ (b : B), is_compact_el (B b))
@@ -67,6 +69,7 @@ Section CompactBasisInDCPO.
        (∏ (x : X), is_least_upperbound X (compact_basis_le_map B x) x).
 
   Definition compact_basis
+             (X : dcpo)
     : UU
     := ∑ (B : dcpo_basis_data X), compact_basis_laws B.
 
@@ -74,23 +77,27 @@ Section CompactBasisInDCPO.
    2. Accessors and builders for compact bases
    *)
   Definition make_compact_basis
+             {X : dcpo}
              (B : dcpo_basis_data X)
              (HB : compact_basis_laws B)
-    : compact_basis
+    : compact_basis X
     := B ,, HB.
 
   Coercion compact_basis_to_data
-           (B : compact_basis)
+           {X : dcpo}
+           (B : compact_basis X)
     : dcpo_basis_data X
     := pr1 B.
 
   Coercion compact_basis_to_laws
-           (B : compact_basis)
+           {X : dcpo}
+           (B : compact_basis X)
     : compact_basis_laws B
     := pr2 B.
 
   Proposition is_compact_el_basis
-              (B : compact_basis)
+              {X : dcpo}
+              (B : compact_basis X)
               (b : B)
     : is_compact_el (B b).
   Proof.
@@ -98,7 +105,8 @@ Section CompactBasisInDCPO.
   Qed.
 
   Proposition is_directed_compact_basis
-              (B : compact_basis)
+              {X : dcpo}
+              (B : compact_basis X)
               (x : X)
     : is_directed X (compact_basis_le_map B x).
   Proof.
@@ -106,7 +114,8 @@ Section CompactBasisInDCPO.
   Qed.
 
   Definition directed_set_from_compact_basis
-             (B : compact_basis)
+             {X : dcpo}
+             (B : compact_basis X)
              (x : X)
     : directed_set X.
   Proof.
@@ -117,7 +126,8 @@ Section CompactBasisInDCPO.
   Defined.
 
   Proposition is_least_upperbound_compact_basis
-              (B : compact_basis)
+              {X : dcpo}
+              (B : compact_basis X)
               (x : X)
     : is_least_upperbound X (compact_basis_le_map B x) x.
   Proof.
@@ -125,7 +135,8 @@ Section CompactBasisInDCPO.
   Qed.
 
   Proposition approximating_compact_basis_lub
-              (B : compact_basis)
+              {X : dcpo}
+              (B : compact_basis X)
               (x : X)
     : ⨆ (directed_set_from_compact_basis B x) = x.
   Proof.
@@ -194,11 +205,11 @@ Defined.
  4. Compact bases from bases of which every element is compact
  *)
 Section BasisToCompact.
-  Context {X : dcpo}
-          (B : dcpo_basis X)
-          (HB : ∏ (b : B), is_compact_el (B b)).
 
   Proposition dcpo_basis_with_compact_to_compact_basis_laws
+          {X : dcpo}
+          (B : dcpo_basis X)
+          (HB : ∏ (b : B), is_compact_el (B b))
     : compact_basis_laws X B.
   Proof.
     refine (_ ,, _ ,, _).
@@ -213,9 +224,7 @@ Section BasisToCompact.
         }
         intros b.
         induction b as [ b p ].
-        refine (hinhpr (b ,, _)).
-        apply way_below_to_le.
-        exact p.
+        exact (hinhpr (b ,, way_below_to_le p)).
       + intros i j.
         induction i as [ b₁ p₁ ].
         induction j as [ b₂ p₂ ].
@@ -254,11 +263,14 @@ Section BasisToCompact.
   Qed.
 
   Definition dcpo_basis_with_compact_to_compact_basis
+          {X : dcpo}
+          (B : dcpo_basis X)
+          (HB : ∏ (b : B), is_compact_el (B b))
     : compact_basis X.
   Proof.
     use make_compact_basis.
     - exact B.
-    - exact dcpo_basis_with_compact_to_compact_basis_laws.
+    - exact(dcpo_basis_with_compact_to_compact_basis_laws B HB).
   Defined.
 End BasisToCompact.
 
@@ -418,3 +430,4 @@ Proof.
   - refine (scott_continuous_map_from_basis CB f Hf ,, _).
     apply scott_continuous_map_from_compact_basis_eq.
 Defined.
+

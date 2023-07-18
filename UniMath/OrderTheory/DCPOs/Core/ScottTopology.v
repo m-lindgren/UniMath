@@ -33,17 +33,17 @@ Require Import UniMath.OrderTheory.DCPOs.Basis.Continuous.
 Local Open Scope dcpo.
 
 Section ScottTopology.
-  Context {X : dcpo}.
-
   (**
    1. Lower and upper sets
    *)
   Definition is_lower_set
+             {X : dcpo}
              (P : X → hProp)
     : hProp
     := (∀ (x y : X), P y ⇒ x ≤ y ⇒ P x)%logic.
 
   Definition is_upper_set
+             {X : dcpo}
              (P : X → hProp)
     : hProp
     := (∀ (x y : X), P x ⇒ x ≤ y ⇒ P y)%logic.
@@ -52,21 +52,25 @@ Section ScottTopology.
    2. Scott open and Scott closed sets
    *)
   Definition is_lub_inaccessible
+             {X : dcpo}
              (P : X → hProp)
     : hProp
     := (∀ (D : directed_set X), P(⨆ D) ⇒ ∃ (i : D), P(D i))%logic.
 
   Definition is_closed_under_lub
+             {X : dcpo}
              (P : X → hProp)
     : hProp
     := (∀ (D : directed_set X), (∀ (i : D), P (D i)) ⇒ P(⨆ D))%logic.
 
   Definition is_scott_closed
+             {X : dcpo}
              (P : X → hProp)
     : hProp
     := is_lower_set P ∧ is_closed_under_lub P.
 
   Definition is_scott_open
+             {X : dcpo}
              (P : X → hProp)
     : hProp
     := is_upper_set P ∧ is_lub_inaccessible P.
@@ -119,11 +123,11 @@ Coercion is_scott_closed_scott_closed_set
  4. Accessors for Scott open and Scott closed sets
  *)
 Section ScottClosedAccessors.
-  Context {X : dcpo}
-          {P : X → hProp}
-          (HP : is_scott_closed P).
 
   Proposition is_scott_closed_lower_set
+              {X : dcpo}
+              {P : X → hProp}
+              (HP : is_scott_closed P)
               {x y : X}
               (Py : P y)
               (p : x ≤ y)
@@ -133,6 +137,9 @@ Section ScottClosedAccessors.
   Qed.
 
   Proposition is_scott_closed_lub
+              {X : dcpo}
+              {P : X → hProp}
+              (HP : is_scott_closed P)
               (D : directed_set X)
               (HD : ∀ (i : D), P (D i))
     : P(⨆ D).
@@ -142,11 +149,11 @@ Section ScottClosedAccessors.
 End ScottClosedAccessors.
 
 Section ScottOpenAccessors.
-  Context {X : dcpo}
-          {P : X → hProp}
-          (HP : is_scott_open P).
 
   Proposition is_scott_open_upper_set
+              {X : dcpo}
+              {P : X → hProp}
+              (HP : is_scott_open P)
               {x y : X}
               (Py : P x)
               (p : x ≤ y)
@@ -156,6 +163,9 @@ Section ScottOpenAccessors.
   Qed.
 
   Proposition is_scott_open_lub_inaccessible
+              {X : dcpo}
+              {P : X → hProp}
+              (HP : is_scott_open P)
               (D : directed_set X)
               (HD : P(⨆ D))
     : ∃ (i : D), P (D i).
@@ -165,12 +175,13 @@ Section ScottOpenAccessors.
 End ScottOpenAccessors.
 
 Section PropertiesScottTopology.
-  Context {X : dcpo}.
+
 
   (**
    5. Lower sets are Scott closed
    *)
   Proposition lower_set_is_scott_closed
+              {X : dcpo}
               (x : X)
     : is_scott_closed (λ y, y ≤ x).
   Proof.
@@ -186,6 +197,7 @@ Section PropertiesScottTopology.
    6. Upper sets (with respect to the way-below relation) are Scott open
    *)
   Proposition upper_set_is_scott_open
+              {X : dcpo}
               (CX : continuous_dcpo_struct X)
               (x : X)
     : is_scott_open (λ y, x ≪ y).
@@ -218,17 +230,18 @@ Section PropertiesScottTopology.
    7. Complements of Scott open sets
    *)
   Proposition complement_of_scott_open
+              {X : dcpo}
               (P : X → hProp)
               (HP : is_scott_open P)
     : is_scott_closed (λ x, ¬(P x))%logic.
   Proof.
     split.
-    - cbn ; intros x y p q H.
-      apply p.
+    - intros x y p q H.
+      use p.
       use (pr1 HP x).
       + exact H.
       + exact q.
-    - cbn ; intros D HD p.
+    - intros D HD p.
       assert (H := is_scott_open_lub_inaccessible HP D p).
       revert H.
       use factor_through_squash.
@@ -237,7 +250,7 @@ Section PropertiesScottTopology.
       }
       intro i.
       induction i as [ i Hi ].
-      apply (HD i).
+      use (HD i).
       exact Hi.
   Qed.
 End PropertiesScottTopology.

@@ -35,10 +35,6 @@ Require Import UniMath.OrderTheory.DCPOs.Core.Basics.
 
 Local Open Scope dcpo.
 
-(* TODO : Enable Universe Checking. *)
-
-Local Unset Universe Checking.
-
 (**
  1. Definition of the way-below relation
  *)
@@ -62,12 +58,11 @@ Proof.
 Qed.
 
 Section PropertiesOfWayBelow.
-  Context {X : dcpo}.
-
   (**
    2. Transitivity of the way-below relation
    *)
   Proposition trans_way_below
+              {X : dcpo}
               {x y z : X}
               (p : x ≪ y)
               (q : y ≪ z)
@@ -95,6 +90,7 @@ Section PropertiesOfWayBelow.
    3. Interaction between the order of the DCPO and the way-below relation
    *)
   Proposition trans_way_below_le
+              {X : dcpo}
               {x y z : X}
               (p : x ≪ y)
               (q : y ≤ z)
@@ -105,6 +101,7 @@ Section PropertiesOfWayBelow.
   Qed.
 
   Proposition trans_le_way_below
+              {X : dcpo}
               {x y z : X}
               (p : x ≤ y)
               (q : y ≪ z)
@@ -124,6 +121,7 @@ Section PropertiesOfWayBelow.
   Qed.
 
   Proposition way_below_to_le
+              {X : dcpo}
               {x y : X}
               (p : x ≪ y)
     : x ≤ y.
@@ -147,6 +145,7 @@ Section PropertiesOfWayBelow.
    4. Antisymmetry of the way-below relation
    *)
   Proposition antisymm_way_below
+              {X : dcpo}
               {x y : X}
               (p : x ≪ y)
               (q : y ≪ x)

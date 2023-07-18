@@ -67,10 +67,6 @@ Definition is_continuous_dcpo
   : hProp
   := ∥ continuous_dcpo_struct X ∥.
 
-(* TODO : Enable Universe Checking
-          [approximating_family_lub] and [unary_interpolation] are
-          very slow to type check. *)
-
 Section ContinuousDCPOAccessors.
 
   Definition approximating_family

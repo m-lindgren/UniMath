@@ -51,22 +51,23 @@ Require Import UniMath.OrderTheory.DCPOs.Basis.Continuous.
 Local Open Scope dcpo.
 
 Section BasisInDCPO.
-  Context {X : dcpo}.
-
   (**
    1. Definition of a basis
    *)
   Definition dcpo_basis_data
+    (X : dcpo)
     : UU
     := ∑ (B : UU), B → X.
 
   Coercion dcpo_basis_data_to_type
-           (B : dcpo_basis_data)
+           {X : dcpo}
+           (B : dcpo_basis_data X)
     : UU
     := pr1 B.
 
   Definition dcpo_basis_data_to_dcpo
-             (B : dcpo_basis_data)
+             {X : dcpo}
+             (B : dcpo_basis_data X)
              (b : B)
     : X
     := pr2 B b.
@@ -74,25 +75,29 @@ Section BasisInDCPO.
   Coercion dcpo_basis_data_to_dcpo : dcpo_basis_data >-> Funclass.
 
   Definition make_dcpo_basis_data
+             {X : dcpo}
              (B : UU)
              (β : B → X)
-    : dcpo_basis_data
+    : dcpo_basis_data X
     := B ,, β.
 
   Definition basis_below_element
-             (B : dcpo_basis_data)
+             {X : dcpo}
+             (B : dcpo_basis_data X)
              (x : X)
     : UU
     := ∑ (b : B), B b ≪ x.
 
   Definition basis_below_map
-             (B : dcpo_basis_data)
+             {X : dcpo}
+             (B : dcpo_basis_data X)
              (x : X)
     : basis_below_element B x → X
     := λ b, B(pr1 b).
 
   Definition dcpo_basis_laws
-             (B : dcpo_basis_data)
+             {X : dcpo}
+             (B : dcpo_basis_data X)
     : UU
     := ∏ (x : X),
        is_directed X (basis_below_map B x)
@@ -100,30 +105,35 @@ Section BasisInDCPO.
        is_least_upperbound X (basis_below_map B x) x.
 
   Definition dcpo_basis
+             (X : dcpo)
     : UU
-    := ∑ (B : dcpo_basis_data), dcpo_basis_laws B.
+    := ∑ (B : dcpo_basis_data X), dcpo_basis_laws B.
 
   (**
    2. Accessors and builders for bases
    *)
   Definition make_dcpo_basis
-             (B : dcpo_basis_data)
+             {X : dcpo}
+             (B : dcpo_basis_data X)
              (HB : dcpo_basis_laws B)
-    : dcpo_basis
+    : dcpo_basis X
     := B ,, HB.
 
   Coercion dcpo_basis_to_data
-           (B : dcpo_basis)
-    : dcpo_basis_data
+           {X : dcpo}
+           (B : dcpo_basis X)
+    : dcpo_basis_data X
     := pr1 B.
 
   Coercion dcpo_basis_to_laws
-           (B : dcpo_basis)
+           {X : dcpo}
+           (B : dcpo_basis X)
     : dcpo_basis_laws B
     := pr2 B.
 
   Proposition is_directed_basis
-              (B : dcpo_basis)
+              {X : dcpo}
+              (B : dcpo_basis X)
               (x : X)
     : is_directed X (basis_below_map B x).
   Proof.
@@ -131,7 +141,8 @@ Section BasisInDCPO.
   Qed.
 
   Definition directed_set_from_basis
-             (B : dcpo_basis)
+             {X : dcpo}
+             (B : dcpo_basis X)
              (x : X)
     : directed_set X.
   Proof.
@@ -142,7 +153,8 @@ Section BasisInDCPO.
   Defined.
 
   Proposition is_least_upperbound_basis
-              (B : dcpo_basis)
+              {X : dcpo}
+              (B : dcpo_basis X)
               (x : X)
     : is_least_upperbound X (basis_below_map B x) x.
   Proof.
@@ -150,7 +162,8 @@ Section BasisInDCPO.
   Qed.
 
   Proposition approximating_basis_lub
-              (B : dcpo_basis)
+              {X : dcpo}
+              (B : dcpo_basis X)
               (x : X)
     : ⨆ (directed_set_from_basis B x) = x.
   Proof.

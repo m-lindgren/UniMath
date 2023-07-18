@@ -35,78 +35,114 @@ Local Open Scope dcpo.
  1. Upperbounds
  *)
 Section Upperbounds.
-  Context {X : hSet}
-          (PX : PartialOrder X)
-          {I : UU}
-          (D : I → X).
 
   Definition is_upperbound
+             {X : hSet}
+             (PX : PartialOrder X)
+             {I : UU}
+             (D : I → X)
              (x : X)
     : hProp
     := ∀ (i : I), PX (D i) x.
 
   Definition is_least_upperbound
+             {X : hSet}
+             (PX : PartialOrder X)
+             {I : UU}
+             (D : I → X)
              (x : X)
     : hProp
-    := (is_upperbound x ∧ ∀ (y : X), is_upperbound y ⇒ PX x y)%logic.
+    := (is_upperbound PX D x ∧ ∀ (y : X), is_upperbound PX D y ⇒ PX x y)%logic.
 
   Proposition is_least_upperbound_is_upperbound
+              {X : hSet}
+              {PX : PartialOrder X}
+              {I : UU}
+              {D : I → X}
               {x : X}
-              (Hx : is_least_upperbound x)
-    : is_upperbound x.
+              (Hx : is_least_upperbound PX D x)
+    : is_upperbound PX D x.
   Proof.
     exact (pr1 Hx).
   Qed.
 
   Proposition is_least_upperbound_is_least
+              {X : hSet}
+              {PX : PartialOrder X}
+              {I : UU}
+              {D : I → X}
               {x : X}
-              (Hx : is_least_upperbound x)
+              (Hx : is_least_upperbound PX D x)
               {y : X}
-              (Hy : is_upperbound y)
+              (Hy : is_upperbound PX D y)
     : PX x y.
   Proof.
     exact (pr2 Hx y Hy).
   Qed.
 
   Definition lub
+          {X : hSet}
+          (PX : PartialOrder X)
+          {I : UU}
+          (D : I → X)
     : UU
-    := ∑ (x : X), is_least_upperbound x.
+    := ∑ (x : X), is_least_upperbound PX D x.
 
   Definition make_lub
+             {X : hSet}
+             {PX : PartialOrder X}
+             {I : UU}
+             {D : I → X}
              (x : X)
-             (Hx : is_least_upperbound x)
-    : lub
+             (Hx : is_least_upperbound PX D x)
+    : lub PX D
     := x ,, Hx.
 
   Coercion lub_to_el
-           (x : lub)
+           {X : hSet}
+           (PX : PartialOrder X)
+           {I : UU}
+           (D : I → X)
+           (x : lub PX D)
     : X
     := pr1 x.
 
   Proposition lub_is_upperbound
-              (x : lub)
-    : is_upperbound x.
+              {X : hSet}
+              {PX : PartialOrder X}
+              {I : UU}
+              {D : I → X}
+              (x : lub PX D)
+    : is_upperbound PX D x.
   Proof.
     exact (is_least_upperbound_is_upperbound (pr2 x)).
   Qed.
 
   Proposition lub_is_least
-              (x : lub)
+              {X : hSet}
+              {PX : PartialOrder X}
+              {I : UU}
+              {D : I → X}
+              (x : lub PX D)
               (y : X)
-              (Hy : is_upperbound y)
+              (Hy : is_upperbound PX D y)
     : PX x y.
   Proof.
     exact (is_least_upperbound_is_least (pr2 x) Hy).
   Qed.
 
   Proposition eq_lub
+              {X : hSet}
+              (PX : PartialOrder X)
+              {I : UU}
+              (D : I → X)
               {x y : X}
-              (Hx : is_least_upperbound x)
-              (Hy : is_least_upperbound y)
+              (Hx : is_least_upperbound PX D x)
+              (Hy : is_least_upperbound PX D y)
     : x = y.
   Proof.
-    pose (x' := (x ,, Hx) : lub).
-    pose (y' := (y ,, Hy) : lub).
+    pose (x' := (x ,, Hx) : lub PX D).
+    pose (y' := (y ,, Hy) : lub PX D).
     use (antisymm_PartialOrder PX).
     - apply (lub_is_least x' y').
       exact (lub_is_upperbound y').
@@ -115,17 +151,16 @@ Section Upperbounds.
   Qed.
 
   Definition isaprop_lub
-    : isaprop lub.
+          {X : hSet}
+          (PX : PartialOrder X)
+          {I : UU}
+          (D : I → X)
+    : isaprop (lub PX D).
   Proof.
     use invproofirrelevance.
     intros x₁ x₂.
-    use subtypePath.
-    {
-      intro ; apply propproperty.
-    }
-    use eq_lub.
-    - exact (pr2 x₁).
-    - exact (pr2 x₂).
+    use subtypePath_prop.
+    exact(eq_lub _ _ (pr2 x₁) (pr2 x₂)).
   Qed.
 End Upperbounds.
 

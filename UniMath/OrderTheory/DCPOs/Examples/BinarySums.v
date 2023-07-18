@@ -54,15 +54,15 @@ Require Import UniMath.OrderTheory.DCPOs.Core.ScottContinuous.
 Local Open Scope dcpo.
 
 Section CoproductOfDCPO.
-  Context (X Y : dcpo).
 
   (**
    1. Directed sets in the coproduct
    *)
   Section DirectedSetInCoproduct.
-    Context (D : directed_set (coproduct_PartialOrder X Y)).
 
     Definition directed_set_all_inl_or_all_inr
+      (X Y : dcpo)
+      (D : directed_set (coproduct_PartialOrder X Y))
       : (∀ (i : D), ∃ (x : X), D i = inl x)
         ∨
         (∀ (i : D), ∃ (y : Y), D i = inr y).
@@ -132,9 +132,11 @@ Section CoproductOfDCPO.
     Qed.
 
     Section LeftDirectedSet.
-      Context (H : ∀ (i : D), ∃ (x : X), D i = inl x).
 
       Definition all_inl_directed_set_map_help
+                 {X Y : dcpo}
+                 {D : directed_set (coproduct_PartialOrder X Y)}
+                 (H : ∀ (i : D), ∃ (x : X), D i = inl x)
                  (i : D)
                  (w : X ⨿ Y)
                  (r : w = D i)
@@ -153,33 +155,45 @@ Section CoproductOfDCPO.
       Defined.
 
       Proposition all_inl_directed_set_map_eq_help
+                  {X Y : dcpo}
+                  {D : directed_set (coproduct_PartialOrder X Y)}
+                  (H : ∀ (i : D), ∃ (x : X), D i = inl x)
                   (i : D)
                   (x : X)
                   (r : inl x = D i)
-        : all_inl_directed_set_map_help i (inl x) r = x.
+        : all_inl_directed_set_map_help H i (inl x) r = x.
       Proof.
         apply idpath.
       Qed.
 
       Definition all_inl_directed_set_map
+                 {X Y : dcpo}
+                 {D : directed_set (coproduct_PartialOrder X Y)}
+                 (H : ∀ (i : D), ∃ (x : X), D i = inl x)
                  (i : D)
         : X
-        := all_inl_directed_set_map_help i (D i) (idpath _).
+        := all_inl_directed_set_map_help H i (D i) (idpath _).
 
       Proposition all_inl_directed_set_map_eq
+                  {X Y : dcpo}
+                  {D : directed_set (coproduct_PartialOrder X Y)}
+                  (H : ∀ (i : D), ∃ (x : X), D i = inl x)
                   (i : D)
                   (x : X)
                   (p : D i = inl x)
-        : all_inl_directed_set_map i = x.
+        : all_inl_directed_set_map H i = x.
       Proof.
         unfold all_inl_directed_set_map.
-        refine (_ @ all_inl_directed_set_map_eq_help i x (!p)).
+        refine (_ @ all_inl_directed_set_map_eq_help H i x (!p)).
         induction p.
         apply idpath.
       Qed.
 
       Proposition is_directed_all_inl_directed_set_to_left
-        : is_directed X all_inl_directed_set_map.
+                  {X Y : dcpo}
+                  {D : directed_set (coproduct_PartialOrder X Y)}
+                  (H : ∀ (i : D), ∃ (x : X), D i = inl x)
+        : is_directed X (all_inl_directed_set_map H).
       Proof.
         split.
         - exact (directed_set_el D).
@@ -210,9 +224,9 @@ Section CoproductOfDCPO.
               rewrite <- pj in H₂.
               cbn in H₁, H₂.
               refine (hinhpr (t ,, _)).
-              rewrite (all_inl_directed_set_map_eq t x Hx).
-              rewrite (all_inl_directed_set_map_eq i xi (!pi)).
-              rewrite (all_inl_directed_set_map_eq j xj (!pj)).
+              rewrite (all_inl_directed_set_map_eq H t x Hx).
+              rewrite (all_inl_directed_set_map_eq H i xi (!pi)).
+              rewrite (all_inl_directed_set_map_eq H j xj (!pj)).
               split.
               ** exact H₁.
               ** exact H₂.
@@ -225,19 +239,25 @@ Section CoproductOfDCPO.
       Qed.
 
       Definition all_inl_directed_set_to_left
+                 {X Y : dcpo}
+                 {D : directed_set (coproduct_PartialOrder X Y)}
+                 (H : ∀ (i : D), ∃ (x : X), D i = inl x)
         : directed_set X.
       Proof.
         use make_directed_set.
         - exact D.
-        - exact all_inl_directed_set_map.
-        - exact is_directed_all_inl_directed_set_to_left.
+        - exact (all_inl_directed_set_map H).
+        - exact (is_directed_all_inl_directed_set_to_left H).
       Defined.
 
       Proposition is_lub_all_inl_directed_set_to_left
+                  {X Y : dcpo}
+                  {D : directed_set (coproduct_PartialOrder X Y)}
+                  (H : ∀ (i : D), ∃ (x : X), D i = inl x)
         : is_least_upperbound
             (coproduct_PartialOrder X Y)
             D
-            (inl (⨆ all_inl_directed_set_to_left)).
+            (inl (⨆ all_inl_directed_set_to_left H)).
       Proof.
         split.
         - intros i.
@@ -250,9 +270,9 @@ Section CoproductOfDCPO.
           intro p.
           induction p as [ x p ].
           rewrite p.
-          use (less_than_dcpo_lub all_inl_directed_set_to_left _ i).
+          use (less_than_dcpo_lub (all_inl_directed_set_to_left H) _ i).
           cbn.
-          rewrite (all_inl_directed_set_map_eq i x p).
+          rewrite (all_inl_directed_set_map_eq H i x p).
           apply refl_dcpo.
         - intros y Hy.
           induction y as [ x | y ].
@@ -270,7 +290,7 @@ Section CoproductOfDCPO.
             induction H' as [ x' H' ].
             rewrite H' in p.
             cbn in p.
-            rewrite (all_inl_directed_set_map_eq i x' H').
+            rewrite (all_inl_directed_set_map_eq H i x' H').
             exact p.
           + cbn.
             assert (el := directed_set_el D).
@@ -296,9 +316,11 @@ Section CoproductOfDCPO.
     End LeftDirectedSet.
 
     Section RightDirectedSet.
-      Context (H : ∀ (i : D), ∃ (y : Y), D i = inr y).
 
       Definition all_inr_directed_set_map_help
+                 {X Y : dcpo}
+                 {D : directed_set (coproduct_PartialOrder X Y)}
+                 (H : ∀ (i : D), ∃ (y : Y), D i = inr y)
                  (i : D)
                  (w : X ⨿ Y)
                  (r : w = D i)
@@ -317,33 +339,45 @@ Section CoproductOfDCPO.
       Defined.
 
       Proposition all_inr_directed_set_map_eq_help
+                  {X Y : dcpo}
+                  {D : directed_set (coproduct_PartialOrder X Y)}
+                  (H : ∀ (i : D), ∃ (y : Y), D i = inr y)
                   (i : D)
                   (y : Y)
                   (r : inr y = D i)
-        : all_inr_directed_set_map_help i (inr y) r = y.
+        : all_inr_directed_set_map_help H i (inr y) r = y.
       Proof.
         apply idpath.
       Qed.
 
       Definition all_inr_directed_set_map
+                 {X Y : dcpo}
+                 {D : directed_set (coproduct_PartialOrder X Y)}
+                 (H : ∀ (i : D), ∃ (y : Y), D i = inr y)
                  (i : D)
         : Y
-        := all_inr_directed_set_map_help i (D i) (idpath _).
+        := all_inr_directed_set_map_help H i (D i) (idpath _).
 
       Proposition all_inr_directed_set_map_eq
+                  {X Y : dcpo}
+                  {D : directed_set (coproduct_PartialOrder X Y)}
+                  (H : ∀ (i : D), ∃ (y : Y), D i = inr y)
                   (i : D)
                   (y : Y)
                   (p : D i = inr y)
-        : all_inr_directed_set_map i = y.
+        : all_inr_directed_set_map H i = y.
       Proof.
         unfold all_inr_directed_set_map.
-        refine (_ @ all_inr_directed_set_map_eq_help i y (!p)).
+        refine (_ @ all_inr_directed_set_map_eq_help H i y (!p)).
         induction p.
         apply idpath.
       Qed.
 
       Proposition is_directed_all_inr_directed_set_to_right
-        : is_directed Y all_inr_directed_set_map.
+                  {X Y : dcpo}
+                  {D : directed_set (coproduct_PartialOrder X Y)}
+                  (H : ∀ (i : D), ∃ (y : Y), D i = inr y)
+        : is_directed Y (all_inr_directed_set_map H).
       Proof.
         split.
         - exact (directed_set_el D).
@@ -380,28 +414,34 @@ Section CoproductOfDCPO.
               rewrite <- pj in H₂.
               cbn in H₁, H₂.
               refine (hinhpr (t ,, _)).
-              rewrite (all_inr_directed_set_map_eq t y Hy).
-              rewrite (all_inr_directed_set_map_eq i yi (!pi)).
-              rewrite (all_inr_directed_set_map_eq j yj (!pj)).
+              rewrite (all_inr_directed_set_map_eq H t y Hy).
+              rewrite (all_inr_directed_set_map_eq H i yi (!pi)).
+              rewrite (all_inr_directed_set_map_eq H j yj (!pj)).
               split.
               ** exact H₁.
               ** exact H₂.
       Qed.
 
       Definition all_inr_directed_set_to_right
+                 {X Y : dcpo}
+                 {D : directed_set (coproduct_PartialOrder X Y)}
+                 (H : ∀ (i : D), ∃ (y : Y), D i = inr y)
         : directed_set Y.
       Proof.
         use make_directed_set.
         - exact D.
-        - exact all_inr_directed_set_map.
-        - exact is_directed_all_inr_directed_set_to_right.
+        - exact (all_inr_directed_set_map H).
+        - exact (is_directed_all_inr_directed_set_to_right H).
       Defined.
 
       Proposition is_lub_all_inr_directed_set_to_right
+                  {X Y : dcpo}
+                  {D : directed_set (coproduct_PartialOrder X Y)}
+                  (H : ∀ (i : D), ∃ (y : Y), D i = inr y)
         : is_least_upperbound
             (coproduct_PartialOrder X Y)
             D
-            (inr (⨆ all_inr_directed_set_to_right)).
+            (inr (⨆ all_inr_directed_set_to_right H)).
       Proof.
         split.
         - intros i.
@@ -414,9 +454,9 @@ Section CoproductOfDCPO.
           intro p.
           induction p as [ y p ].
           rewrite p.
-          use (less_than_dcpo_lub all_inr_directed_set_to_right _ i).
+          use (less_than_dcpo_lub (all_inr_directed_set_to_right H) _ i).
           cbn.
-          rewrite (all_inr_directed_set_map_eq i y p).
+          rewrite (all_inr_directed_set_map_eq H i y p).
           apply refl_dcpo.
         - intros y Hy.
           induction y as [ x | y ].
@@ -454,12 +494,14 @@ Section CoproductOfDCPO.
             induction H' as [ y' H' ].
             rewrite H' in p.
             cbn in p.
-            rewrite (all_inr_directed_set_map_eq i y' H').
+            rewrite (all_inr_directed_set_map_eq H i y' H').
             exact p.
       Qed.
     End RightDirectedSet.
 
     Definition directed_set_coproduct_with_eq
+               {X Y : dcpo}
+               {D : directed_set (coproduct_PartialOrder X Y)}
       : ((∑ (D' : D → X) (HD : is_directed X D'),
           let DX := make_directed_set _ D D' HD in
           (is_least_upperbound (coproduct_PartialOrder X Y) D (inl (⨆ DX)))
@@ -472,7 +514,7 @@ Section CoproductOfDCPO.
          ×
          (∏ (i : D), D i = inr (D' i))))%type.
     Proof.
-      assert (h := directed_set_all_inl_or_all_inr).
+      assert (h := @directed_set_all_inl_or_all_inr X Y D).
       revert h.
       use factor_through_squash.
       {
@@ -517,13 +559,15 @@ Section CoproductOfDCPO.
     Defined.
 
     Definition directed_set_coproduct
+               {X Y : dcpo}
+               (D : directed_set (coproduct_PartialOrder X Y))
       : (∑ (D' : directed_set X),
          is_least_upperbound (coproduct_PartialOrder X Y) D (inl (⨆ D')))
         ∨
         (∑ (D' : directed_set Y),
          is_least_upperbound (coproduct_PartialOrder X Y) D (inr (⨆ D'))).
     Proof.
-      assert (h := directed_set_all_inl_or_all_inr).
+      assert (h := @directed_set_all_inl_or_all_inr X Y D).
       revert h.
       use factor_through_squash.
       {
@@ -542,6 +586,7 @@ Section CoproductOfDCPO.
    2. Coproduct of DCPOs
    *)
   Definition coproduct_dcpo_inl_lub
+             (X Y : dcpo)
              (D : directed_set X)
     : lub
         (coproduct_PartialOrder X Y)
@@ -565,6 +610,7 @@ Section CoproductOfDCPO.
   Defined.
 
   Definition coproduct_dcpo_inr_lub
+             (X Y : dcpo)
              (D : directed_set Y)
     : lub
         (coproduct_PartialOrder X Y)
@@ -588,6 +634,7 @@ Section CoproductOfDCPO.
   Defined.
 
   Definition coproduct_dcpo_lub
+             (X Y : dcpo)
              (D : directed_set (coproduct_PartialOrder X Y))
     : lub (coproduct_PartialOrder X Y) D.
   Proof.
@@ -610,75 +657,82 @@ Section CoproductOfDCPO.
   Defined.
 
   Definition coproduct_dcpo_struct
+             (X Y : dcpo)
     : dcpo_struct (setcoprod X Y).
   Proof.
     use make_dcpo_struct.
     - exact (coproduct_PartialOrder X Y).
     - intros I Df HDf.
       pose (D := make_directed_set _ I Df HDf).
-      exact (coproduct_dcpo_lub D).
+      exact (coproduct_dcpo_lub X Y D).
   Defined.
 
   Definition coproduct_dcpo
+    (X Y : dcpo)
     : dcpo
-    := _ ,, coproduct_dcpo_struct.
+    := _ ,, coproduct_dcpo_struct X Y.
 
   (**
    3. Scott continuity of inclusion
    *)
   Proposition is_scott_continuous_inl
-    : is_scott_continuous X coproduct_dcpo inl.
+              (X Y : dcpo)
+    : is_scott_continuous X (coproduct_dcpo X Y) inl.
   Proof.
     use make_is_scott_continuous.
     - apply inl_monotone_function.
     - intro D ; cbn.
       use (eq_lub
-             coproduct_dcpo
+             (coproduct_dcpo X Y)
              (directed_set_comp (inl_monotone_function X Y) D)).
-      + exact (pr2 (coproduct_dcpo_inl_lub D)).
+      + exact (pr2 (coproduct_dcpo_inl_lub X Y D)).
       + exact (is_least_upperbound_dcpo_comp_lub
                  _
                  D).
   Qed.
 
   Definition inl_scott_continuous_map
-    : scott_continuous_map X coproduct_dcpo
-    := inl ,, is_scott_continuous_inl.
+             (X Y : dcpo)
+    : scott_continuous_map X (coproduct_dcpo X Y)
+    := inl ,, (is_scott_continuous_inl X Y).
 
   Proposition is_scott_continuous_inr
-    : is_scott_continuous Y coproduct_dcpo inr.
+              (X Y : dcpo)
+    : is_scott_continuous Y (coproduct_dcpo X Y) inr.
   Proof.
     use make_is_scott_continuous.
     - apply inr_monotone_function.
     - intro D ; cbn.
       use (eq_lub
-             coproduct_dcpo
+             (coproduct_dcpo X Y)
              (directed_set_comp (inr_monotone_function X Y) D)).
-      + exact (pr2 (coproduct_dcpo_inr_lub D)).
+      + exact (pr2 (coproduct_dcpo_inr_lub X Y D)).
       + exact (is_least_upperbound_dcpo_comp_lub
                  _
                  D).
   Qed.
 
   Definition inr_scott_continuous_map
-    : scott_continuous_map Y coproduct_dcpo
-    := inr ,, is_scott_continuous_inr.
+             (X Y : dcpo)
+    : scott_continuous_map Y (coproduct_dcpo X Y)
+    := inr ,, is_scott_continuous_inr X Y.
 
   (**
    4. The sum of Scott continuous maps is Scott continuous
    *)
   Proposition is_scott_continuous_sumofmaps
+              {X Y : dcpo}
               {Z : dcpo}
               {f : X → Z}
               (Pf : is_scott_continuous X Z f)
               {g : Y → Z}
               (Pg : is_scott_continuous Y Z g)
-    : is_scott_continuous coproduct_dcpo Z (sumofmaps f g).
+    : is_scott_continuous (coproduct_dcpo X Y) Z (sumofmaps f g).
   Proof.
     use make_is_scott_continuous.
     - exact (is_monotone_sumofmaps _ _ (pr1 Pf) (pr1 Pg)).
     - intros D.
-      assert (D' := directed_set_coproduct_with_eq D).
+      assert (D' := @directed_set_coproduct_with_eq X Y D).
       revert D'.
       use factor_through_squash.
       {
@@ -691,7 +745,7 @@ Section CoproductOfDCPO.
         assert (⨆ D = inl (⨆ DX)) as q.
         {
           use (eq_lub
-                 coproduct_dcpo
+                 (coproduct_dcpo X Y)
                  D
                  _
                  H).
@@ -720,7 +774,7 @@ Section CoproductOfDCPO.
         assert (⨆ D = inr (⨆ DY)) as q.
         {
           use (eq_lub
-                 coproduct_dcpo
+                 (coproduct_dcpo X Y)
                  D
                  _
                  H).
@@ -747,9 +801,9 @@ Section CoproductOfDCPO.
   Qed.
 
   Definition sumof_scott_continuous_maps
-             {Z : dcpo}
+             {X Y Z : dcpo}
              (f : scott_continuous_map X Z)
              (g : scott_continuous_map Y Z)
-    : scott_continuous_map coproduct_dcpo Z
+    : scott_continuous_map (coproduct_dcpo X Y) Z
     := sumofmaps f g ,, is_scott_continuous_sumofmaps (pr2 f) (pr2 g).
 End CoproductOfDCPO.
